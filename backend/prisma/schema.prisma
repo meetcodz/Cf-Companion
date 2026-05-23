@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  cfHandle      String    @unique @map("cf_handle")
+  email         String?   @unique
+  createdAt     DateTime  @default(now()) @map("created_at")
+  lastSyncedAt  DateTime? @map("last_synced_at")
+
+  stats             UserStats?
+  solvedProblems    SolvedProblem[]
+  contestReminders  ContestReminder[]
+
+  @@map("users")
+}
+
+model UserStats {
+  id             Int     @id @default(autoincrement())
+  userId         Int     @unique @map("user_id")
+  currentRating  Int     @default(0) @map("current_rating")
+  maxRating      Int     @default(0) @map("max_rating")
+  solvedCount    Int     @default(0) @map("solved_count")
+  rank           String  @default("unrated")
+  // JSON stored as string: { "greedy": 42, "dp": 18, ... }
+  tagBreakdown   String  @default("{}") @map("tag_breakdown")
+  // JSON stored as string: [{ "date": "...", "rating": 1200 }, ...]
+  ratingHistory  String  @default("[]") @map("rating_history")
+  // JSON: { "800": 12, "900": 8, ... }
+  ratingBreakdown String @default("{}") @map("rating_breakdown")
+
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_stats")
+}
+
+model SolvedProblem {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @map("user_id")
+  contestId     Int      @map("contest_id")
+  problemIndex  String   @map("problem_index")
+  problemName   String   @map("problem_name")
+  rating        Int?
+  tags          String   @default("[]") // JSON array as string
+  solvedAt      DateTime @map("solved_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contestId, problemIndex])
+  @@map("solved_problems")
+}
+
+model ContestReminder {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @map("user_id")
+  cfContestId     Int      @map("cf_contest_id")
+  cfContestName   String   @map("cf_contest_name")
+  startsAt        DateTime @map("starts_at")
+  reminded        Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cfContestId])
+  @@map("contest_reminders")
+}
