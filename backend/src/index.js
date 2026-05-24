@@ -11,6 +11,8 @@ const userRoutes = require("./routes/users");
 const problemRoutes = require("./routes/problems");
 const contestRoutes = require("./routes/contests");
 const leaderboardRoutes = require("./routes/leaderboard");
+const aiRoutes = require("./routes/ai");
+const forumRoutes = require("./routes/forum");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -75,6 +77,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/problems", problemRoutes);
 app.use("/api/contests", contestRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
+app.use("/api/ai", aiRoutes);
+app.use("/api/forum", forumRoutes);
 
 // ─── Serve Frontend ───────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, "../../frontend")));

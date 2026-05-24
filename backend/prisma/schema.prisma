@@ -17,6 +17,7 @@ model User {
   stats             UserStats?
   solvedProblems    SolvedProblem[]
   contestReminders  ContestReminder[]
+  practiceSets      PracticeSet[]
 
   @@map("users")
 }
@@ -70,4 +71,67 @@ model ContestReminder {
 
   @@unique([userId, cfContestId])
   @@map("contest_reminders")
+}
+
+// AI response cache — avoids hammering Gemini for the same profile twice
+model AICache {
+  id         Int      @id @default(autoincrement())
+  cacheKey   String   @unique @map("cache_key")
+  response   String   // full AI text response
+  createdAt  DateTime @default(now()) @map("created_at")
+  expiresAt  DateTime @map("expires_at")
+
+  @@map("ai_cache")
+}
+
+// Practice sets — saved for a user, static or virtual contest mode
+model PracticeSet {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  title       String
+  mode        String   @default("practice") // "practice" | "contest"
+  tags        String   @default("[]")       // JSON: string[]
+  problems    String   @default("[]")       // JSON: problem objects
+  durationMin Int?     @map("duration_min") // for contest mode
+  startedAt   DateTime? @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("practice_sets")
+}
+
+// Forum threads — scoped by tag or problem
+model ForumThread {
+  id          Int      @id @default(autoincrement())
+  title       String
+  authorHandle String  @map("author_handle")
+  tag         String?  // e.g. "greedy", "dp" — null for general
+  problemId   String?  @map("problem_id") // "contestId-index" if problem-specific
+  isPinned    Boolean  @default(false) @map("is_pinned")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  posts  ForumPost[]
+
+  @@map("forum_threads")
+}
+
+// Forum posts — replies within a thread
+model ForumPost {
+  id           Int      @id @default(autoincrement())
+  threadId     Int      @map("thread_id")
+  authorHandle String   @map("author_handle")
+  content      String
+  parentId     Int?     @map("parent_id") // null = top-level, set = reply
+  upvotes      Int      @default(0)
+  createdAt    DateTime @default(now()) @map("created_at")
+  editedAt     DateTime? @map("edited_at")
+
+  thread  ForumThread  @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  parent  ForumPost?   @relation("PostReplies", fields: [parentId], references: [id])
+  replies ForumPost[]  @relation("PostReplies")
+
+  @@map("forum_posts")
 }
