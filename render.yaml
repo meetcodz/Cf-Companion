@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: cf-companion
+    runtime: node
+    plan: free
+    buildCommand: npm run install:all
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 30011
+      - key: DATABASE_URL
+        sync: false # To be provided by user (Neon or Supabase connection string)
+      - key: OPENROUTER_API_KEY
+        sync: false # To be provided by user (OpenRouter/Gemini API key)
+      - key: FRONTEND_URL
+        sync: false # Fallback or custom domain (e.g. https://cf-companion.onrender.com)
+      - key: EMAIL_USER
+        sync: false # Gmail handle for reminders
+      - key: EMAIL_PASS
+        sync: false # Gmail App Password
+      - key: EMAIL_FROM
+        sync: false # Display name for email sender

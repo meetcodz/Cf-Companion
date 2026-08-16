@@ -1,201 +1,117 @@
-# CFCompanion — Deployment Guide
+# CFCompanion Deployment Guide
 
-Everything you need to go from local files to a live public URL.
-
----
-
-## Overview
-
-| Layer    | Service  | Free tier |
-|----------|----------|-----------|
-| Backend  | Railway  | $5 credit/mo (enough for hobby) |
-| Database | Railway Postgres | Included with backend |
-| Frontend | Vercel   | Completely free |
+This guide details how to take the restructured, professional-grade **CFCompanion** application from local files to a live production server.
 
 ---
 
-## Part 1 — Backend on Railway
+## Deployment Architecture Options
 
-### Step 1: Push backend to GitHub
+| Option | Services | DB Hosting | Setup Complexity | Costs | Pros |
+|---|---|---|---|---|---|
+| **Option A: Unified (Recommended)** | Render (Web Service) | Neon / Supabase | Low (One Service) | Free | Zero CORS issues, single service dashboard, simpler env management |
+| **Option B: Split** | Vercel (Frontend) + Render (API Backend) | Neon / Supabase | Medium | Free | Marginally faster frontend page loading via Vercel Edge |
 
+---
+
+## Database Provisioning (Prerequisites)
+
+Because Render's free tier uses ephemeral storage (which resets on every build/reboot), a persistent external database is required.
+
+### Set up a Free PostgreSQL Database
+
+#### Option 1: Neon (Recommended)
+1. Go to **[Neon.tech](https://neon.tech)** and register a free account.
+2. Create a new project named `cf-companion`.
+3. Under the **Dashboard**, locate your connection string (marked as `DATABASE_URL`).
+4. Copy the connection string. It will look like:
+   `postgresql://alex:password@ep-cool-butterfly-12345.us-east-2.aws.neon.tech/neondb?sslmode=require`
+
+#### Option 2: Supabase
+1. Go to **[Supabase.com](https://supabase.com)** and create a new project.
+2. In Project Settings -> **Database**, locate your connection string.
+3. Switch connection mode to **Transaction** (port 6543) or **Session** (port 5432).
+4. Copy the URL. It will look like:
+   `postgresql://postgres:password@db.yourprojectid.supabase.co:5432/postgres`
+
+---
+
+## Option A: Unified Deployment on Render (Recommended)
+
+In this setup, your Render Web Service runs the Express server, which hosts both the API and serves the static frontend pages.
+
+### Step 1: Push Code to GitHub
+Ensure all your local changes are committed and pushed to your remote repository:
 ```bash
-# From the cfcompanion/ root
-git init
 git add .
-git commit -m "initial: cfcompanion backend + frontend"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/cfcompanion.git
-git push -u origin main
+git commit -m "chore: restructure project and configure postgresql"
+git push origin main
 ```
 
-### Step 2: Create Railway project
+### Step 2: Deploy Web Service on Render
+1. Go to **[Render.com](https://render.com)** and sign in.
+2. Click **New +** -> **Blueprint**. (This reads the `render.yaml` configuration file).
+3. Connect your GitHub repository.
+4. Render will automatically read `render.yaml` and configure the service parameters.
+5. Provide values for the required environment variables:
+   - `DATABASE_URL`: Paste the PostgreSQL connection string from Neon/Supabase.
+   - `OPENROUTER_API_KEY`: Your OpenRouter/Gemini API key.
+   - `EMAIL_USER`: Your Gmail email address.
+   - `EMAIL_PASS`: Gmail 16-character App Password (Security -> 2-Step Verification -> App Passwords).
+   - `EMAIL_FROM`: Mail display name (e.g. `CFCompanion <your_email@gmail.com>`).
+6. Click **Approve**. Render will build and deploy the application.
 
-1. Go to [railway.app](https://railway.app) → **New Project**
-2. Choose **Deploy from GitHub repo**
-3. Select your `cfcompanion` repo
-4. When asked for the root directory, set it to **`backend`**
-5. Railway will detect Node.js automatically and start building
-
-### Step 3: Add Postgres database
-
-1. In your Railway project dashboard → **New** → **Database** → **PostgreSQL**
-2. Click the Postgres service → **Variables** tab
-3. Copy the `DATABASE_URL` value (starts with `postgresql://...`)
-
-### Step 4: Set environment variables
-
-In Railway → your backend service → **Variables** tab, add:
-
-```
-DATABASE_URL        = <paste from Postgres plugin>
-NODE_ENV            = production
-FRONTEND_URL        = https://YOUR_APP.vercel.app   ← fill in after Step 7
-CF_API_BASE         = https://codeforces.com/api
-CF_CACHE_TTL        = 300
-EMAIL_USER          = your_gmail@gmail.com
-EMAIL_PASS          = your_16char_app_password
-EMAIL_FROM          = CFCompanion <your_gmail@gmail.com>
-```
-
-> **EMAIL_PASS**: Go to [myaccount.google.com](https://myaccount.google.com) →
-> Security → 2-Step Verification → App Passwords → generate one for "Mail".
-
-### Step 5: Set up the database
-
-In Railway → your backend service → **Shell** tab (or use the Railway CLI):
-
+### Step 3: Run Database Migrations
+To push tables to the new database, run this once locally from your project directory pointing to the production database:
 ```bash
-npx prisma db push
+# Temporarily set your local shell environment variable to the production DB
+# In PowerShell:
+$env:DATABASE_URL="YOUR_NEON_OR_SUPABASE_PRODUCTION_DB_URL"
+npx prisma db push --schema=backend/prisma/schema.prisma
 ```
 
-This creates all tables from `schema.prisma`. Run this once only.
-
-### Step 6: Get your backend URL
-
-Railway → your backend service → **Settings** → **Domains** → **Generate Domain**.
-
-You'll get something like:
-```
-https://cfcompanion-production.up.railway.app
-```
-
-Save this — you need it for the frontend.
+### Step 4: Verify Deployment
+Render will assign you a domain like `https://cf-companion.onrender.com`. Open it, register your handle, test the progressive hint system, and review the forums.
 
 ---
 
-## Part 2 — Frontend on Vercel
+## Option B: Split Deployment (Vercel + Render Backend)
 
-### Step 7: Set your backend URL
+### Step 1: Deploy API Backend on Render
+1. Go to **Render.com** -> **New +** -> **Web Service**.
+2. Connect your GitHub repository.
+3. Configure the following:
+   - **Name:** `cfcompanion-api`
+   - **Runtime:** `Node`
+   - **Build Command:** `npm run install:all`
+   - **Start Command:** `npm start`
+4. Add the required Environment Variables in the Settings tab (`DATABASE_URL`, `OPENROUTER_API_KEY`, etc.).
+5. Render will deploy the API backend and generate a URL (e.g., `https://cfcompanion-api.onrender.com`).
 
-Open `frontend/js/config.js` and replace the placeholder:
+### Step 2: Configure Frontend Configuration
+1. Open `frontend/js/config.js`.
+2. Replace `BACKEND_URL` with your newly deployed Render API URL:
+   ```javascript
+   const BACKEND_URL = "https://cfcompanion-api.onrender.com";
+   ```
+3. Commit and push this change to GitHub:
+   ```bash
+   git add frontend/js/config.js
+   git commit -m "config: point to production backend API URL"
+   git push origin main
+   ```
 
-```js
-const BACKEND_URL = "https://cfcompanion-production.up.railway.app";
-```
+### Step 3: Deploy Frontend on Vercel
+1. Go to **[Vercel.com](https://vercel.com)** and sign in.
+2. Click **Add New** -> **Project**.
+3. Import your GitHub repository.
+4. Set the **Root Directory** to `frontend`.
+5. Under Framework Preset, select **Other**.
+6. Click **Deploy**.
+7. Vercel will deploy the frontend and give you a URL (e.g., `https://cfcompanion.vercel.app`).
 
-Commit and push:
-```bash
-git add frontend/js/config.js
-git commit -m "config: set production backend URL"
-git push
-```
-
-### Step 8: Deploy frontend to Vercel
-
-1. Go to [vercel.com](https://vercel.com) → **New Project**
-2. Import the same GitHub repo
-3. Set **Root Directory** to `frontend`
-4. Framework Preset: **Other**
-5. Click **Deploy**
-
-Vercel will give you a URL like `https://cfcompanion.vercel.app`.
-
-### Step 9: Update CORS on Railway
-
-Go back to Railway → Variables → update:
-```
-FRONTEND_URL = https://cfcompanion.vercel.app
-```
-
-Railway auto-redeploys on variable changes.
-
----
-
-## Part 3 — Verify everything works
-
-Hit these URLs to confirm the deployment:
-
-```
-GET https://your-backend.up.railway.app/health
-→ { "status": "ok", "uptime": 42 }
-
-GET https://your-backend.up.railway.app/api/contests/upcoming
-→ [...list of contests...]
-
-GET https://your-backend.up.railway.app/api/leaderboard
-→ []   (empty until users register)
-```
-
-Then open your Vercel URL and try:
-1. Landing page loads and the problem picker works
-2. Register yourself on the Leaderboard page
-3. Open the Analyzer with your CF handle
-4. Check the Contests page — countdowns should be ticking
-
----
-
-## Local Development
-
-```bash
-# Terminal 1 — backend
-cd backend
-cp .env.example .env        # fill in your local Postgres URL
-npm install
-npx prisma db push          # first time only
-npm run dev                 # runs on localhost:3000
-
-# Terminal 2 — frontend
-cd frontend
-# Open with VS Code Live Server, or:
-npx serve .                 # runs on localhost:3000 or 5000
-```
-
-For local dev, `config.js` falls back to `http://localhost:3000` automatically —
-you don't need to change it.
-
----
-
-## Keeping data fresh
-
-The backend runs a cron job every night at 3 AM UTC that re-syncs all
-registered users from the CF API. This keeps leaderboard ratings current.
-
-You can also manually trigger a sync for any user:
-```
-POST /api/users/:handle/sync
-```
-
----
-
-## Custom domain (optional)
-
-Railway and Vercel both support custom domains on free/hobby plans:
-
-- **Backend**: Railway → Settings → Domains → Add Custom Domain
-- **Frontend**: Vercel → Settings → Domains → Add
-
-After adding a custom domain, update `FRONTEND_URL` in Railway variables
-and `BACKEND_URL` in `config.js`.
-
----
-
-## Troubleshooting
-
-| Problem | Fix |
-|---------|-----|
-| `CORS error` in browser | Make sure `FRONTEND_URL` in Railway matches your Vercel URL exactly (no trailing slash) |
-| `DATABASE_URL not set` on startup | Re-check Railway Variables tab, ensure it's the Postgres plugin URL |
-| Prisma client error | Run `npx prisma generate` in Railway Shell |
-| CF API 503 | CF API occasionally goes down. The cache means most requests still work. |
-| Emails not sending | Verify `EMAIL_PASS` is an App Password, not your Gmail login password |
-| Contest reminders not firing | User must have an email set at registration time |
+### Step 4: Update CORS Settings on Render
+To allow your frontend to communicate with the API:
+1. Go to your Render Web Service dashboard -> **Environment** tab.
+2. Add/update the following environment variable:
+   - `FRONTEND_URL` = `https://cfcompanion.vercel.app` (your Vercel domain, no trailing slash).
+3. Save changes. Render will auto-redeploy.

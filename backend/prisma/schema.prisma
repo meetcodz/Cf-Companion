@@ -18,6 +18,8 @@ model User {
   solvedProblems    SolvedProblem[]
   contestReminders  ContestReminder[]
   practiceSets      PracticeSet[]
+  verified          Boolean  @default(false)
+  verificationCode  String?  @map("verification_code")
 
   @@map("users")
 }
@@ -132,6 +134,19 @@ model ForumPost {
   thread  ForumThread  @relation(fields: [threadId], references: [id], onDelete: Cascade)
   parent  ForumPost?   @relation("PostReplies", fields: [parentId], references: [id])
   replies ForumPost[]  @relation("PostReplies")
+  upvotedBy PostUpvote[]
 
   @@map("forum_posts")
+}
+
+model PostUpvote {
+  id          Int       @id @default(autoincrement())
+  postId      Int       @map("post_id")
+  userHandle  String    @map("user_handle")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  post        ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userHandle])
+  @@map("post_upvotes")
 }

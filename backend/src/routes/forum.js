@@ -136,14 +136,37 @@ router.post("/threads/:id/posts", async (req, res) => {
 // POST /api/forum/posts/:id/upvote
 // Body: { handle }
 router.post("/posts/:id/upvote", async (req, res) => {
+  const { handle } = req.body;
+  if (!handle) return res.status(400).json({ error: "User handle required." });
+
   try {
+    // Verify user existence and verification status
+    const user = await prisma.user.findFirst({
+      where: { cfHandle: { equals: handle, mode: "insensitive" } },
+      select: { verified: true },
+    });
+    if (!user) return res.status(404).json({ error: "User not found." });
+    if (!user.verified) return res.status(403).json({ error: "User not verified." });
+
+    // Check if this user already upvoted this post
+    const existing = await prisma.postUpvote.findFirst({
+      where: { postId: parseInt(req.params.id), userHandle: handle },
+    });
+    if (existing) return res.status(400).json({ error: "Already upvoted." });
+
+    // Record upvote
+    await prisma.postUpvote.create({
+      data: { postId: parseInt(req.params.id), userHandle: handle },
+    });
+
+    // Increment upvote counter atomically
     const post = await prisma.forumPost.update({
       where: { id: parseInt(req.params.id) },
       data: { upvotes: { increment: 1 } },
     });
     res.json({ upvotes: post.upvotes });
   } catch (err) {
-    res.status(404).json({ error: "Post not found." });
+    res.status(500).json({ error: err.message });
   }
 });
 

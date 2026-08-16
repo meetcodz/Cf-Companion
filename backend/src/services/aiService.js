@@ -1,8 +1,8 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const prisma = require("../utils/prisma");
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const MODEL = "gemini-1.5-flash";
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "openrouter/free";
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 // Cache TTL: 6 hours for profile analysis (it's expensive), 24h for hints
 const PROFILE_TTL_HOURS = 6;
@@ -29,13 +29,39 @@ async function setCache(key, response, ttlHours) {
   });
 }
 
-async function callGemini(prompt) {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY not configured.");
+async function callAI(prompt) {
+  if (!OPENROUTER_API_KEY) {
+    throw new Error("OPENROUTER_API_KEY not configured. Get one at https://openrouter.ai/keys");
   }
-  const model = genAI.getGenerativeModel({ model: MODEL });
-  const result = await model.generateContent(prompt);
-  return result.response.text();
+
+  const response = await fetch(OPENROUTER_URL, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": "https://cfcompanion.dev",
+      "X-Title": "CFCompanion",
+    },
+    body: JSON.stringify({
+      model: OPENROUTER_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 1024,
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`OpenRouter API error (${response.status}): ${err}`);
+  }
+
+  const data = await response.json();
+  const content = data.choices?.[0]?.message?.content;
+  
+  if (!content) {
+    throw new Error(`OpenRouter returned empty response. Raw data: ${JSON.stringify(data)}`);
+  }
+  
+  return content;
 }
 
 // ─── Profile analysis ──────────────────────────────────────────────────────
@@ -107,7 +133,7 @@ Write a coaching analysis with these sections (use these exact headers):
 
 Be specific, direct, and use actual numbers from the data. No fluff. Write like a tough but supportive coach, not a chatbot. Max 400 words total.`;
 
-  const analysis = await callGemini(prompt);
+  const analysis = await callAI(prompt);
   await setCache(cacheKey, analysis, PROFILE_TTL_HOURS);
   return { analysis, cached: false };
 }
@@ -141,7 +167,7 @@ ${levelDescriptions[level]}
 
 Do NOT reveal the full solution or write any code. Keep it encouraging. Start directly with the hint, no preamble.`;
 
-  const hint = await callGemini(prompt);
+  const hint = await callAI(prompt);
   await setCache(cacheKey, hint, HINT_TTL_HOURS);
   return { hint, level, cached: false };
 }
@@ -219,7 +245,7 @@ RATIONALE: [2 sentences]
 
   let rationale = "";
   try {
-    rationale = await callGemini(prompt);
+    rationale = await callAI(prompt);
   } catch (_) {
     rationale = "RATIONALE: This set targets your selected tags at an appropriate difficulty level.\n" +
       candidates.map((_, i) => `${i + 1}. Practice problem targeting selected skills.`).join("\n");

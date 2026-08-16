@@ -6,7 +6,7 @@
  * to make relative API requests to the same host.
  */
 
-const BACKEND_URL = "";
+const BACKEND_URL = "http://localhost:30011";
 
 // This makes the URL available globally — all pages read window.CF_API_URL
 window.CF_API_URL = BACKEND_URL;
