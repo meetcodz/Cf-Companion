@@ -61,9 +61,7 @@ router.get("/recommend/:handle", async (req, res) => {
     const tagBreakdown = JSON.parse(user.stats?.tagBreakdown || "{}");
 
     // Build solved set for fast lookup
-    const solvedSet = new Set(
-      user.solvedProblems.map((p) => `${p.contestId}-${p.problemIndex}`)
-    );
+    const solvedSet = new Set(user.solvedProblems.map((p) => `${p.contestId}-${p.problemIndex}`));
 
     // Determine weak tags (bottom 5 by solve count, minimum 2 solves to be considered)
     const weakTags = Object.entries(tagBreakdown)

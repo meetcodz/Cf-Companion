@@ -37,7 +37,7 @@ async function callAI(prompt) {
   const response = await fetch(OPENROUTER_URL, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+      Authorization: `Bearer ${OPENROUTER_API_KEY}`,
       "Content-Type": "application/json",
       "HTTP-Referer": "https://cfcompanion.dev",
       "X-Title": "CFCompanion",
@@ -56,11 +56,11 @@ async function callAI(prompt) {
 
   const data = await response.json();
   const content = data.choices?.[0]?.message?.content;
-  
+
   if (!content) {
     throw new Error(`OpenRouter returned empty response. Raw data: ${JSON.stringify(data)}`);
   }
-  
+
   return content;
 }
 
@@ -92,9 +92,10 @@ async function analyzeProfile(cfHandle) {
 
   // Compute trajectory
   const lastFiveContests = ratingHistory.slice(-5);
-  const trajectory = lastFiveContests.length >= 2
-    ? lastFiveContests[lastFiveContests.length - 1].rating - lastFiveContests[0].rating
-    : 0;
+  const trajectory =
+    lastFiveContests.length >= 2
+      ? lastFiveContests[lastFiveContests.length - 1].rating - lastFiveContests[0].rating
+      : 0;
 
   // Sort tags
   const topTags = Object.entries(tagBreakdown)
@@ -191,9 +192,7 @@ async function generatePracticeSet(cfHandle, selectedTags, count, mode, allProbl
   }
 
   const currentRating = user.stats.currentRating || 1200;
-  const solvedSet = new Set(
-    user.solvedProblems.map((p) => `${p.contestId}-${p.problemIndex}`)
-  );
+  const solvedSet = new Set(user.solvedProblems.map((p) => `${p.contestId}-${p.problemIndex}`));
 
   // Rating band: practice mode = current ± 200, contest = spread from -100 to +400
   const minRating = mode === "contest" ? currentRating - 100 : currentRating - 100;
@@ -227,9 +226,12 @@ async function generatePracticeSet(cfHandle, selectedTags, count, mode, allProbl
   }
 
   // Generate AI rationale for each problem
-  const problemList = candidates.map((p, i) =>
-    `${i + 1}. "${p.name}" (${p.contestId}${p.index}) — Rating: ${p.rating}, Tags: ${p.tags.slice(0, 3).join(", ")}`
-  ).join("\n");
+  const problemList = candidates
+    .map(
+      (p, i) =>
+        `${i + 1}. "${p.name}" (${p.contestId}${p.index}) — Rating: ${p.rating}, Tags: ${p.tags.slice(0, 3).join(", ")}`
+    )
+    .join("\n");
 
   const prompt = `You are a CP coach. A student with rating ${currentRating} wants to practice these tags: ${selectedTags.join(", ") || "general"}.
 
@@ -247,7 +249,8 @@ RATIONALE: [2 sentences]
   try {
     rationale = await callAI(prompt);
   } catch (_) {
-    rationale = "RATIONALE: This set targets your selected tags at an appropriate difficulty level.\n" +
+    rationale =
+      "RATIONALE: This set targets your selected tags at an appropriate difficulty level.\n" +
       candidates.map((_, i) => `${i + 1}. Practice problem targeting selected skills.`).join("\n");
   }
 
@@ -255,19 +258,22 @@ RATIONALE: [2 sentences]
   const practiceSet = await prisma.practiceSet.create({
     data: {
       userId: user.id,
-      title: mode === "contest"
-        ? `Virtual Contest — ${selectedTags.join(", ") || "Mixed"}`
-        : `Practice Set — ${selectedTags.join(", ") || "Mixed"}`,
+      title:
+        mode === "contest"
+          ? `Virtual Contest — ${selectedTags.join(", ") || "Mixed"}`
+          : `Practice Set — ${selectedTags.join(", ") || "Mixed"}`,
       mode,
       tags: JSON.stringify(selectedTags),
-      problems: JSON.stringify(candidates.map((p) => ({
-        name: p.name,
-        contestId: p.contestId,
-        index: p.index,
-        rating: p.rating,
-        tags: p.tags,
-        url: `https://codeforces.com/problemset/problem/${p.contestId}/${p.index}`,
-      }))),
+      problems: JSON.stringify(
+        candidates.map((p) => ({
+          name: p.name,
+          contestId: p.contestId,
+          index: p.index,
+          rating: p.rating,
+          tags: p.tags,
+          url: `https://codeforces.com/problemset/problem/${p.contestId}/${p.index}`,
+        }))
+      ),
       durationMin: mode === "contest" ? count * 30 : null, // 30min per problem estimate
     },
   });

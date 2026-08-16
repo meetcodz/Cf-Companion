@@ -18,7 +18,7 @@ async function registerUser(cfHandle, email = null) {
 
   // 2. Check not already registered (case-insensitively)
   const existing = await prisma.user.findFirst({
-    where: { cfHandle: { equals: canonicalHandle, mode: "insensitive" } }
+    where: { cfHandle: { equals: canonicalHandle, mode: "insensitive" } },
   });
   if (existing) {
     // Already registered: trigger a full sync to update their rating/stats immediately!
@@ -97,9 +97,7 @@ async function syncUser(userId, cfHandle) {
     select: { contestId: true, problemIndex: true },
   });
 
-  const existingSet = new Set(
-    existingSolved.map((p) => `${p.contestId}-${p.problemIndex}`)
-  );
+  const existingSet = new Set(existingSolved.map((p) => `${p.contestId}-${p.problemIndex}`));
 
   const newSolved = solvedProblems.filter(
     (p) => !existingSet.has(`${p.contestId}-${p.problemIndex}`)

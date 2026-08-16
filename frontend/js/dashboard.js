@@ -5,10 +5,10 @@ const API = window.CF_API_URL || "http://localhost:3000";
 let currentHandle = null;
 
 /* ── DOM refs ───────────────────────────────────────────────── */
-const searchInput  = document.getElementById("searchInput");
-const searchBtn    = document.getElementById("searchBtn");
-const dashboard    = document.getElementById("dashboard");
-const emptyState   = document.getElementById("emptyState");
+const searchInput = document.getElementById("searchInput");
+const searchBtn = document.getElementById("searchBtn");
+const dashboard = document.getElementById("dashboard");
+const emptyState = document.getElementById("emptyState");
 
 /* ── Toast ──────────────────────────────────────────────────── */
 function toast(msg, type = "info") {
@@ -75,7 +75,7 @@ async function loadDashboard(handle) {
         const regRes = await fetch(`${API}/api/users/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cfHandle: handle })
+          body: JSON.stringify({ cfHandle: handle }),
         });
         if (!regRes.ok) {
           const errData = await regRes.json();
@@ -87,7 +87,9 @@ async function loadDashboard(handle) {
       }
     }
 
-    const recommendations = await apiFetch(`/api/problems/recommend/${handle}?count=8`).catch(() => null);
+    const recommendations = await apiFetch(`/api/problems/recommend/${handle}?count=8`).catch(
+      () => null
+    );
 
     renderProfile(profile);
     renderStats(profile.stats);
@@ -104,7 +106,6 @@ async function loadDashboard(handle) {
     const url = new URL(window.location);
     url.searchParams.set("handle", handle);
     window.history.pushState({}, "", url);
-
   } catch (err) {
     toast(err.message, "error");
     console.error(err);
@@ -119,20 +120,19 @@ function renderProfile(profile) {
   const { cfHandle, lastSyncedAt, stats } = profile;
 
   document.getElementById("ph-handle").textContent = cfHandle;
-  document.getElementById("ph-rank").textContent =
-    (stats?.rank || "unrated").toUpperCase();
-  document.getElementById("ph-rating").textContent =
-    stats?.currentRating || "—";
-  document.getElementById("ph-rating").style.color =
-    ratingColor(stats?.currentRating);
+  document.getElementById("ph-rank").textContent = (stats?.rank || "unrated").toUpperCase();
+  document.getElementById("ph-rating").textContent = stats?.currentRating || "—";
+  document.getElementById("ph-rating").style.color = ratingColor(stats?.currentRating);
 
   const synced = lastSyncedAt
     ? new Date(lastSyncedAt).toLocaleDateString("en-US", {
-        month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       })
     : "never";
-  document.getElementById("ph-synced").innerHTML =
-    `Last synced: <strong>${synced}</strong>`;
+  document.getElementById("ph-synced").innerHTML = `Last synced: <strong>${synced}</strong>`;
   document.getElementById("ph-maxrating").innerHTML =
     `Peak: <strong>${stats?.maxRating || "—"}</strong>`;
 }
@@ -142,16 +142,13 @@ function renderStats(stats) {
   if (!stats) return;
   const tagBreakdown = stats.tagBreakdown || {};
   const uniqueTags = Object.keys(tagBreakdown).length;
-  const topTag = Object.entries(tagBreakdown)
-    .sort((a, b) => b[1] - a[1])[0];
+  const topTag = Object.entries(tagBreakdown).sort((a, b) => b[1] - a[1])[0];
 
   document.getElementById("s-solved").textContent = fmt(stats.solvedCount);
   document.getElementById("s-rating").textContent = fmt(stats.currentRating);
   document.getElementById("s-tags").textContent = uniqueTags;
-  document.getElementById("s-toptag").textContent =
-    topTag ? topTag[0] : "—";
-  document.getElementById("s-toptag-count").textContent =
-    topTag ? `${topTag[1]} solved` : "";
+  document.getElementById("s-toptag").textContent = topTag ? topTag[0] : "—";
+  document.getElementById("s-toptag-count").textContent = topTag ? `${topTag[1]} solved` : "";
 }
 
 /* ── Render: rating history chart ───────────────────────────── */
@@ -159,19 +156,21 @@ function renderRatingChart(history) {
   const canvas = document.getElementById("ratingChart");
   const ctx = canvas.getContext("2d");
 
-  if (window._ratingChartInstance) { window._ratingChartInstance.destroy(); window._ratingChartInstance = null; }
+  if (window._ratingChartInstance) {
+    window._ratingChartInstance.destroy();
+    window._ratingChartInstance = null;
+  }
 
   if (!history.length) {
-    canvas.parentElement.innerHTML =
-      `<div class="empty-state"><div class="empty-icon">📉</div>
+    canvas.parentElement.innerHTML = `<div class="empty-state"><div class="empty-icon">📉</div>
        <div class="empty-text">No contest history</div></div>`;
     return;
   }
 
-  const labels = history.map(h =>
+  const labels = history.map((h) =>
     new Date(h.date).toLocaleDateString("en-US", { month: "short", year: "2-digit" })
   );
-  const data = history.map(h => h.rating);
+  const data = history.map((h) => h.rating);
   const maxR = Math.max(...data);
   const minR = Math.min(...data);
 
@@ -184,17 +183,19 @@ function renderRatingChart(history) {
     type: "line",
     data: {
       labels,
-      datasets: [{
-        data,
-        borderColor: "#3b82f6",
-        borderWidth: 2,
-        fill: true,
-        backgroundColor: gradient,
-        pointRadius: history.length > 30 ? 0 : 3,
-        pointHoverRadius: 5,
-        pointBackgroundColor: "#3b82f6",
-        tension: 0.3,
-      }],
+      datasets: [
+        {
+          data,
+          borderColor: "#3b82f6",
+          borderWidth: 2,
+          fill: true,
+          backgroundColor: gradient,
+          pointRadius: history.length > 30 ? 0 : 3,
+          pointHoverRadius: 5,
+          pointBackgroundColor: "#3b82f6",
+          tension: 0.3,
+        },
+      ],
     },
     options: {
       responsive: true,
@@ -206,9 +207,10 @@ function renderRatingChart(history) {
           borderColor: "rgba(59,130,246,0.4)",
           borderWidth: 1,
           titleFont: { family: "'Space Mono', monospace", size: 11 },
-          bodyFont:  { family: "'Space Mono', monospace", size: 12 },
+          bodyFont: { family: "'Space Mono', monospace", size: 12 },
           callbacks: {
-            title: (items) => history[items[0].dataIndex]?.contestName || labels[items[0].dataIndex],
+            title: (items) =>
+              history[items[0].dataIndex]?.contestName || labels[items[0].dataIndex],
             label: (item) => ` Rating: ${item.raw}`,
           },
         },
@@ -250,7 +252,9 @@ function renderTagBreakdown(tagBreakdown) {
   }
 
   const max = entries[0][1];
-  container.innerHTML = entries.map(([tag, count]) => `
+  container.innerHTML = entries
+    .map(
+      ([tag, count]) => `
     <div class="tag-row">
       <div class="tag-name">${tag}</div>
       <div class="tag-bar-wrap">
@@ -258,11 +262,13 @@ function renderTagBreakdown(tagBreakdown) {
       </div>
       <div class="tag-count">${count}</div>
     </div>
-  `).join("");
+  `
+    )
+    .join("");
 
   // Animate bars after paint
   requestAnimationFrame(() => {
-    document.querySelectorAll(".tag-bar").forEach(bar => {
+    document.querySelectorAll(".tag-bar").forEach((bar) => {
       bar.style.width = bar.dataset.width + "%";
     });
   });
@@ -280,15 +286,20 @@ function renderRatingDist(ratingBreakdown) {
     return;
   }
 
-  const max = Math.max(...entries.map(e => e[1]));
-  container.innerHTML = `<div class="dist-bars">` +
-    entries.map(([r, c]) => `
+  const max = Math.max(...entries.map((e) => e[1]));
+  container.innerHTML =
+    `<div class="dist-bars">` +
+    entries
+      .map(
+        ([r, c]) => `
       <div class="dist-col" title="${r}: ${c} solved">
         <div class="dist-bar" style="height:${Math.max(4, (c / max) * 70)}px"></div>
         <div class="dist-label">${r}</div>
       </div>
-    `).join("") +
-  `</div>`;
+    `
+      )
+      .join("") +
+    `</div>`;
 }
 
 /* ── Render: weak tags ──────────────────────────────────────── */
@@ -298,9 +309,7 @@ function renderWeakTags(weakTags) {
     container.innerHTML = `<div class="empty-text" style="font-family:var(--mono);font-size:12px;color:var(--text-dim)">No weak tags detected — keep grinding!</div>`;
     return;
   }
-  container.innerHTML = weakTags
-    .map(t => `<div class="weak-tag-chip">${t}</div>`)
-    .join("");
+  container.innerHTML = weakTags.map((t) => `<div class="weak-tag-chip">${t}</div>`).join("");
 }
 
 /* ── Render: recommendations ────────────────────────────────── */
@@ -313,7 +322,9 @@ function renderRecommendations(recs) {
     return;
   }
 
-  container.innerHTML = recs.map(p => `
+  container.innerHTML = recs
+    .map(
+      (p) => `
     <a class="rec-item" href="${p.url}" target="_blank" rel="noopener">
       <div class="rec-left">
         <div class="rec-name">${p.name}</div>
@@ -324,7 +335,9 @@ function renderRecommendations(recs) {
         <div class="rec-arrow">→</div>
       </div>
     </a>
-  `).join("");
+  `
+    )
+    .join("");
 }
 
 /* ── Sync button ────────────────────────────────────────────── */

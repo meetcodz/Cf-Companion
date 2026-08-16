@@ -92,18 +92,12 @@ function startContestReminders() {
     for (const reminder of due) {
       if (!reminder.user.email) continue;
       try {
-        await sendReminderEmail(
-          reminder.user.email,
-          reminder.cfContestName,
-          reminder.startsAt
-        );
+        await sendReminderEmail(reminder.user.email, reminder.cfContestName, reminder.startsAt);
         await prisma.contestReminder.update({
           where: { id: reminder.id },
           data: { reminded: true },
         });
-        console.log(
-          `[CRON] Sent reminder to ${reminder.user.email} for ${reminder.cfContestName}`
-        );
+        console.log(`[CRON] Sent reminder to ${reminder.user.email} for ${reminder.cfContestName}`);
       } catch (err) {
         console.error(`[CRON] Failed to send reminder: ${err.message}`);
       }

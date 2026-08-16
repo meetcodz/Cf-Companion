@@ -27,7 +27,12 @@ router.post("/hint", async (req, res) => {
   }
   try {
     const result = await ai.getProblemHint(
-      contestId, problemIndex, problemName || "Unknown", tags, rating, parseInt(level)
+      contestId,
+      problemIndex,
+      problemName || "Unknown",
+      tags,
+      rating,
+      parseInt(level)
     );
     res.json(result);
   } catch (err) {

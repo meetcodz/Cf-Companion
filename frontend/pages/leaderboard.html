@@ -1,451 +1,921 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leaderboard — CFCompanion</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:        #F2F0EB;
-      --bg-2:      #ECEAE4;
-      --bg-3:      #E4E2DC;
-      --ink:       #0F0E0C;
-      --ink-2:     #3A3830;
-      --ink-3:     #7A7670;
-      --cf:        #FF4F00;
-      --cf-dim:    #CC3F00;
-      --cf-pale:   #FFF0EB;
-      --navy:      #0A1628;
-      --navy-2:    #162238;
-      --white:     #FAFAF8;
-      --gold:      #D4A017;
-      --silver:    #8A9BB0;
-      --bronze:    #A0714F;
-      --neo-out:   6px 6px 14px #C8C6C0, -4px -4px 10px #FFFFFF;
-      --neo-in:    inset 3px 3px 8px #C8C6C0, inset -3px -3px 6px #FFFFFF;
-      --neo-card:  8px 8px 20px #C0BEB8, -5px -5px 14px #FFFFFF;
-      --neo-sm:    3px 3px 8px #C8C6C0, -2px -2px 6px #FFFFFF;
-      --serif: 'Instrument Serif', Georgia, serif;
-      --mono:  'DM Mono', monospace;
-      --sans:  'Syne', sans-serif;
-      --ease:  cubic-bezier(0.23, 1, 0.32, 1);
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaderboard — CFCompanion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f2f0eb;
+        --bg-2: #eceae4;
+        --bg-3: #e4e2dc;
+        --ink: #0f0e0c;
+        --ink-2: #3a3830;
+        --ink-3: #7a7670;
+        --cf: #ff4f00;
+        --cf-dim: #cc3f00;
+        --cf-pale: #fff0eb;
+        --navy: #0a1628;
+        --navy-2: #162238;
+        --white: #fafaf8;
+        --gold: #d4a017;
+        --silver: #8a9bb0;
+        --bronze: #a0714f;
+        --neo-out: 6px 6px 14px #c8c6c0, -4px -4px 10px #ffffff;
+        --neo-in: inset 3px 3px 8px #c8c6c0, inset -3px -3px 6px #ffffff;
+        --neo-card: 8px 8px 20px #c0beb8, -5px -5px 14px #ffffff;
+        --neo-sm: 3px 3px 8px #c8c6c0, -2px -2px 6px #ffffff;
+        --serif: "Instrument Serif", Georgia, serif;
+        --mono: "DM Mono", monospace;
+        --sans: "Syne", sans-serif;
+        --ease: cubic-bezier(0.23, 1, 0.32, 1);
+      }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: #C8C6C0; border-radius: 99px; }
-    html { scrollbar-width: thin; scrollbar-color: #C8C6C0 var(--bg); overflow-y: scroll; }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      ::-webkit-scrollbar {
+        width: 4px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #c8c6c0;
+        border-radius: 99px;
+      }
+      html {
+        scrollbar-width: thin;
+        scrollbar-color: #c8c6c0 var(--bg);
+        overflow-y: scroll;
+      }
 
-    body {
-      background: var(--bg); color: var(--ink);
-      font-family: var(--sans); min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+      }
 
-    body::before {
-      content: ''; position: fixed; inset: 0; z-index: 9999;
-      pointer-events: none; opacity: 0.025;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      background-size: 160px 160px;
-    }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        pointer-events: none;
+        opacity: 0.025;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        background-size: 160px 160px;
+      }
 
-    /* ── Nav ── */
-    .nav {
-      position: sticky; top: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 40px; height: 60px;
-      background: rgba(242,240,235,0.9);
-      backdrop-filter: blur(16px) saturate(140%);
-      border-bottom: 1px solid rgba(15,14,12,0.08);
-    }
-    .nav-brand {
-      display: flex; align-items: center; gap: 10px;
-      font-family: var(--sans); font-weight: 800; font-size: 17px;
-      letter-spacing: -0.04em; color: var(--ink); text-decoration: none;
-    }
-    .nav-logo { width: 28px; height: 28px; border-radius: 7px; background: var(--navy); display: flex; align-items: center; justify-content: center; box-shadow: var(--neo-sm); }
-    .nav-logo span { font-family: var(--mono); font-size: 11px; color: var(--cf); }
-    .nav-links {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 4px;
-    }
-    .nav-link { font-family: var(--mono); font-size: 12px; color: var(--ink-3); text-decoration: none; padding: 6px 14px; border-radius: 6px; border: 1px solid transparent; transition: all 0.2s var(--ease); }
-    .nav-link:hover { color: var(--ink); background: var(--bg-2); box-shadow: var(--neo-sm); border-color: rgba(15,14,12,0.06); }
-    .nav-link.active { color: var(--cf); border-color: rgba(255,79,0,0.2); background: var(--cf-pale); }
+      /* ── Nav ── */
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        height: 60px;
+        background: rgba(242, 240, 235, 0.9);
+        backdrop-filter: blur(16px) saturate(140%);
+        border-bottom: 1px solid rgba(15, 14, 12, 0.08);
+      }
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--sans);
+        font-weight: 800;
+        font-size: 17px;
+        letter-spacing: -0.04em;
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .nav-logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        background: var(--navy);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--neo-sm);
+      }
+      .nav-logo span {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--cf);
+      }
+      .nav-links {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 4px;
+      }
+      .nav-link {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--ink-3);
+        text-decoration: none;
+        padding: 6px 14px;
+        border-radius: 6px;
+        border: 1px solid transparent;
+        transition: all 0.2s var(--ease);
+      }
+      .nav-link:hover {
+        color: var(--ink);
+        background: var(--bg-2);
+        box-shadow: var(--neo-sm);
+        border-color: rgba(15, 14, 12, 0.06);
+      }
+      .nav-link.active {
+        color: var(--cf);
+        border-color: rgba(255, 79, 0, 0.2);
+        background: var(--cf-pale);
+      }
 
-    .nav-cta {
-      display: flex; align-items: center; gap: 8px;
-    }
+      .nav-cta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
 
-    .btn-neo {
-      font-family: var(--mono); font-size: 12px; font-weight: 500;
-      letter-spacing: 0.04em; padding: 9px 20px; border-radius: 8px;
-      border: none; cursor: pointer; transition: all 0.18s var(--ease);
-      text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
-    }
+      .btn-neo {
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        padding: 9px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.18s var(--ease);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
 
-    .btn-outline {
-      background: var(--bg); color: var(--ink);
-      box-shadow: var(--neo-out);
-      border: 1px solid rgba(15,14,12,0.08);
-    }
+      .btn-outline {
+        background: var(--bg);
+        color: var(--ink);
+        box-shadow: var(--neo-out);
+        border: 1px solid rgba(15, 14, 12, 0.08);
+      }
 
-    .btn-outline:hover {
-      box-shadow: var(--neo-in);
-      transform: translateY(1px);
-    }
+      .btn-outline:hover {
+        box-shadow: var(--neo-in);
+        transform: translateY(1px);
+      }
 
-    .btn-solid {
-      background: var(--navy); color: var(--white);
-      box-shadow: 4px 4px 12px rgba(10,22,40,0.35);
-    }
+      .btn-solid {
+        background: var(--navy);
+        color: var(--white);
+        box-shadow: 4px 4px 12px rgba(10, 22, 40, 0.35);
+      }
 
-    .btn-solid:hover {
-      background: var(--navy-2);
-      transform: translateY(-1px);
-      box-shadow: 6px 6px 18px rgba(10,22,40,0.4);
-    }
+      .btn-solid:hover {
+        background: var(--navy-2);
+        transform: translateY(-1px);
+        box-shadow: 6px 6px 18px rgba(10, 22, 40, 0.4);
+      }
 
-    /* ── Layout ── */
-    .main { max-width: 1100px; margin: 0 auto; padding: 48px 32px 80px; }
+      /* ── Layout ── */
+      .main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 48px 32px 80px;
+      }
 
-    /* ── Page header ── */
-    .page-top {
-      display: flex; align-items: flex-end; justify-content: space-between;
-      margin-bottom: 36px;
-      animation: fadeUp 0.5s var(--ease) both;
-    }
-    .page-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
-    .page-title { font-family: var(--serif); font-size: 44px; font-weight: 400; letter-spacing: -0.03em; line-height: 1; }
+      /* ── Page header ── */
+      .page-top {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 36px;
+        animation: fadeUp 0.5s var(--ease) both;
+      }
+      .page-eyebrow {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink-3);
+        margin-bottom: 6px;
+      }
+      .page-title {
+        font-family: var(--serif);
+        font-size: 44px;
+        font-weight: 400;
+        letter-spacing: -0.03em;
+        line-height: 1;
+      }
 
-    .sort-controls { display: flex; gap: 8px; }
-    .sort-btn {
-      font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
-      padding: 8px 16px; border-radius: 8px; cursor: pointer;
-      background: var(--bg); box-shadow: var(--neo-out);
-      border: 1px solid rgba(15,14,12,0.08); color: var(--ink-3);
-      transition: all 0.2s var(--ease);
-    }
-    .sort-btn:hover { color: var(--ink); box-shadow: var(--neo-in); transform: translateY(1px); }
-    .sort-btn.active { background: var(--navy); color: var(--white); box-shadow: 4px 4px 12px rgba(10,22,40,0.3); border-color: transparent; }
+      .sort-controls {
+        display: flex;
+        gap: 8px;
+      }
+      .sort-btn {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        background: var(--bg);
+        box-shadow: var(--neo-out);
+        border: 1px solid rgba(15, 14, 12, 0.08);
+        color: var(--ink-3);
+        transition: all 0.2s var(--ease);
+      }
+      .sort-btn:hover {
+        color: var(--ink);
+        box-shadow: var(--neo-in);
+        transform: translateY(1px);
+      }
+      .sort-btn.active {
+        background: var(--navy);
+        color: var(--white);
+        box-shadow: 4px 4px 12px rgba(10, 22, 40, 0.3);
+        border-color: transparent;
+      }
 
-    /* ── Register strip ── */
-    .register-strip {
-      display: flex; align-items: center; gap: 12px;
-      background: var(--bg); border-radius: 16px;
-      box-shadow: var(--neo-card);
-      border: 1px solid rgba(255,255,255,0.7);
-      padding: 20px 24px; margin-bottom: 24px;
-      animation: fadeUp 0.5s 0.08s var(--ease) both;
-    }
-    .reg-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
-    .reg-input {
-      flex: 1; max-width: 240px;
-      background: var(--bg); border: 1px solid rgba(15,14,12,0.1);
-      color: var(--ink); font-family: var(--mono); font-size: 13px;
-      padding: 9px 14px; border-radius: 8px; outline: none;
-      box-shadow: var(--neo-in); transition: border-color 0.2s;
-    }
-    .reg-input::placeholder { color: var(--ink-3); }
-    .reg-input:focus { border-color: var(--cf); }
-    .reg-email { max-width: 200px; }
-    .reg-btn {
-      background: var(--cf); color: var(--white);
-      font-family: var(--mono); font-size: 12px; font-weight: 500;
-      letter-spacing: 0.04em; padding: 9px 20px; border-radius: 8px;
-      border: none; cursor: pointer;
-      box-shadow: 4px 4px 12px rgba(255,79,0,0.3);
-      transition: all 0.2s var(--ease);
-    }
-    .reg-btn:hover { background: var(--cf-dim); transform: translateY(-1px); box-shadow: 5px 5px 16px rgba(255,79,0,0.35); }
-    .reg-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .reg-msg { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
-    .reg-msg.ok  { color: #16a34a; }
-    .reg-msg.err { color: var(--cf); }
+      /* ── Register strip ── */
+      .register-strip {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--bg);
+        border-radius: 16px;
+        box-shadow: var(--neo-card);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        padding: 20px 24px;
+        margin-bottom: 24px;
+        animation: fadeUp 0.5s 0.08s var(--ease) both;
+      }
+      .reg-label {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-3);
+        white-space: nowrap;
+      }
+      .reg-input {
+        flex: 1;
+        max-width: 240px;
+        background: var(--bg);
+        border: 1px solid rgba(15, 14, 12, 0.1);
+        color: var(--ink);
+        font-family: var(--mono);
+        font-size: 13px;
+        padding: 9px 14px;
+        border-radius: 8px;
+        outline: none;
+        box-shadow: var(--neo-in);
+        transition: border-color 0.2s;
+      }
+      .reg-input::placeholder {
+        color: var(--ink-3);
+      }
+      .reg-input:focus {
+        border-color: var(--cf);
+      }
+      .reg-email {
+        max-width: 200px;
+      }
+      .reg-btn {
+        background: var(--cf);
+        color: var(--white);
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        padding: 9px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 4px 4px 12px rgba(255, 79, 0, 0.3);
+        transition: all 0.2s var(--ease);
+      }
+      .reg-btn:hover {
+        background: var(--cf-dim);
+        transform: translateY(-1px);
+        box-shadow: 5px 5px 16px rgba(255, 79, 0, 0.35);
+      }
+      .reg-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .reg-msg {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-3);
+      }
+      .reg-msg.ok {
+        color: #16a34a;
+      }
+      .reg-msg.err {
+        color: var(--cf);
+      }
 
-    /* ── Summary cards ── */
-    .summary-row {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 16px; margin-bottom: 24px;
-      animation: fadeUp 0.5s 0.12s var(--ease) both;
-    }
-    .summary-card {
-      background: var(--bg); border-radius: 14px;
-      box-shadow: var(--neo-card);
-      border: 1px solid rgba(255,255,255,0.7);
-      padding: 20px 24px;
-    }
-    .summary-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
-    .summary-value { font-family: var(--mono); font-size: 28px; font-weight: 500; color: var(--ink); letter-spacing: -0.03em; }
+      /* ── Summary cards ── */
+      .summary-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+        animation: fadeUp 0.5s 0.12s var(--ease) both;
+      }
+      .summary-card {
+        background: var(--bg);
+        border-radius: 14px;
+        box-shadow: var(--neo-card);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        padding: 20px 24px;
+      }
+      .summary-label {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-3);
+        margin-bottom: 8px;
+      }
+      .summary-value {
+        font-family: var(--mono);
+        font-size: 28px;
+        font-weight: 500;
+        color: var(--ink);
+        letter-spacing: -0.03em;
+      }
 
-    /* ── Table wrap ── */
-    .table-wrap {
-      background: var(--bg); border-radius: 20px;
-      box-shadow: var(--neo-card);
-      border: 1px solid rgba(255,255,255,0.7);
-      overflow: hidden;
-      animation: fadeUp 0.5s 0.18s var(--ease) both;
-    }
+      /* ── Table wrap ── */
+      .table-wrap {
+        background: var(--bg);
+        border-radius: 20px;
+        box-shadow: var(--neo-card);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        overflow: hidden;
+        animation: fadeUp 0.5s 0.18s var(--ease) both;
+      }
 
-    .lb-table { width: 100%; border-collapse: collapse; }
+      .lb-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
 
-    .lb-table thead tr {
-      border-bottom: 1px solid rgba(15,14,12,0.07);
-      background: var(--bg-2);
-    }
-    .lb-table th {
-      font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--ink-3); font-weight: 400;
-      padding: 14px 20px; text-align: left;
-    }
-    .lb-table th.right { text-align: right; }
+      .lb-table thead tr {
+        border-bottom: 1px solid rgba(15, 14, 12, 0.07);
+        background: var(--bg-2);
+      }
+      .lb-table th {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-3);
+        font-weight: 400;
+        padding: 14px 20px;
+        text-align: left;
+      }
+      .lb-table th.right {
+        text-align: right;
+      }
 
-    .lb-table tbody tr {
-      border-bottom: 1px solid rgba(15,14,12,0.05);
-      transition: background 0.15s; cursor: pointer;
-    }
-    .lb-table tbody tr:last-child { border-bottom: none; }
-    .lb-table tbody tr:hover { background: var(--cf-pale); }
+      .lb-table tbody tr {
+        border-bottom: 1px solid rgba(15, 14, 12, 0.05);
+        transition: background 0.15s;
+        cursor: pointer;
+      }
+      .lb-table tbody tr:last-child {
+        border-bottom: none;
+      }
+      .lb-table tbody tr:hover {
+        background: var(--cf-pale);
+      }
 
-    /* Podium rows */
-    .lb-table tbody tr.rank-1 td:first-child::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--gold); border-radius: 0 2px 2px 0; }
-    .lb-table tbody tr.rank-2 td:first-child::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--silver); border-radius: 0 2px 2px 0; }
-    .lb-table tbody tr.rank-3 td:first-child::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--bronze); border-radius: 0 2px 2px 0; }
+      /* Podium rows */
+      .lb-table tbody tr.rank-1 td:first-child::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--gold);
+        border-radius: 0 2px 2px 0;
+      }
+      .lb-table tbody tr.rank-2 td:first-child::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--silver);
+        border-radius: 0 2px 2px 0;
+      }
+      .lb-table tbody tr.rank-3 td:first-child::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--bronze);
+        border-radius: 0 2px 2px 0;
+      }
 
-    .lb-table td { padding: 14px 20px; vertical-align: middle; }
-    .lb-table td:first-child { position: relative; }
+      .lb-table td {
+        padding: 14px 20px;
+        vertical-align: middle;
+      }
+      .lb-table td:first-child {
+        position: relative;
+      }
 
-    .rank-cell { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--ink-3); width: 52px; }
-    .rank-medal { font-size: 18px; }
+      .rank-cell {
+        font-family: var(--mono);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--ink-3);
+        width: 52px;
+      }
+      .rank-medal {
+        font-size: 18px;
+      }
 
-    .handle-cell { display: flex; align-items: center; gap: 12px; }
-    .handle-avatar {
-      width: 34px; height: 34px; border-radius: 8px;
-      background: var(--bg-2); box-shadow: var(--neo-sm);
-      border: 1px solid rgba(255,255,255,0.7);
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--mono); font-size: 13px; font-weight: 500;
-      color: var(--ink-2); flex-shrink: 0;
-    }
-    .handle-name { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--ink); }
-    .handle-joined { font-family: var(--mono); font-size: 10px; color: var(--ink-3); margin-top: 2px; }
+      .handle-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .handle-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: var(--bg-2);
+        box-shadow: var(--neo-sm);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--mono);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--ink-2);
+        flex-shrink: 0;
+      }
+      .handle-name {
+        font-family: var(--mono);
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--ink);
+      }
+      .handle-joined {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--ink-3);
+        margin-top: 2px;
+      }
 
-    .cf-rank-badge {
-      font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
-      padding: 3px 10px; border-radius: 99px;
-      background: var(--bg-2); box-shadow: var(--neo-sm);
-      border: 1px solid rgba(15,14,12,0.07); color: var(--ink-3);
-      display: inline-block;
-    }
-    .cf-rank-badge.newbie     { color: #7A7670; }
-    .cf-rank-badge.pupil      { color: #16a34a; background: rgba(22,163,74,0.06); border-color: rgba(22,163,74,0.15); }
-    .cf-rank-badge.specialist { color: #0891b2; background: rgba(8,145,178,0.06); border-color: rgba(8,145,178,0.15); }
-    .cf-rank-badge.expert     { color: #2563eb; background: rgba(37,99,235,0.06); border-color: rgba(37,99,235,0.15); }
-    .cf-rank-badge.candidate  { color: #7c3aed; background: rgba(124,58,237,0.06); border-color: rgba(124,58,237,0.15); }
-    .cf-rank-badge.master     { color: #d97706; background: rgba(217,119,6,0.06); border-color: rgba(217,119,6,0.15); }
-    .cf-rank-badge.grandmaster{ color: var(--cf); background: rgba(255,79,0,0.06); border-color: rgba(255,79,0,0.2); }
-    .cf-rank-badge.legendary  { color: var(--gold); background: rgba(212,160,23,0.08); border-color: rgba(212,160,23,0.2); }
+      .cf-rank-badge {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        padding: 3px 10px;
+        border-radius: 99px;
+        background: var(--bg-2);
+        box-shadow: var(--neo-sm);
+        border: 1px solid rgba(15, 14, 12, 0.07);
+        color: var(--ink-3);
+        display: inline-block;
+      }
+      .cf-rank-badge.newbie {
+        color: #7a7670;
+      }
+      .cf-rank-badge.pupil {
+        color: #16a34a;
+        background: rgba(22, 163, 74, 0.06);
+        border-color: rgba(22, 163, 74, 0.15);
+      }
+      .cf-rank-badge.specialist {
+        color: #0891b2;
+        background: rgba(8, 145, 178, 0.06);
+        border-color: rgba(8, 145, 178, 0.15);
+      }
+      .cf-rank-badge.expert {
+        color: #2563eb;
+        background: rgba(37, 99, 235, 0.06);
+        border-color: rgba(37, 99, 235, 0.15);
+      }
+      .cf-rank-badge.candidate {
+        color: #7c3aed;
+        background: rgba(124, 58, 237, 0.06);
+        border-color: rgba(124, 58, 237, 0.15);
+      }
+      .cf-rank-badge.master {
+        color: #d97706;
+        background: rgba(217, 119, 6, 0.06);
+        border-color: rgba(217, 119, 6, 0.15);
+      }
+      .cf-rank-badge.grandmaster {
+        color: var(--cf);
+        background: rgba(255, 79, 0, 0.06);
+        border-color: rgba(255, 79, 0, 0.2);
+      }
+      .cf-rank-badge.legendary {
+        color: var(--gold);
+        background: rgba(212, 160, 23, 0.08);
+        border-color: rgba(212, 160, 23, 0.2);
+      }
 
-    .rating-cell { font-family: var(--mono); font-size: 16px; font-weight: 500; text-align: right; color: var(--ink); }
-    .rating-peak { font-family: var(--mono); font-size: 10px; color: var(--ink-3); margin-top: 2px; text-align: right; }
+      .rating-cell {
+        font-family: var(--mono);
+        font-size: 16px;
+        font-weight: 500;
+        text-align: right;
+        color: var(--ink);
+      }
+      .rating-peak {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--ink-3);
+        margin-top: 2px;
+        text-align: right;
+      }
 
-    .solved-cell { font-family: var(--mono); font-size: 13px; color: var(--ink-3); text-align: right; }
+      .solved-cell {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--ink-3);
+        text-align: right;
+      }
 
-    /* Rating bar */
-    .rating-bar-col { width: 110px; }
-    .rating-bar-bg { height: 4px; border-radius: 99px; background: var(--bg-3); box-shadow: inset 1px 1px 3px #C0BEB8; overflow: hidden; }
-    .rating-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--cf), #FF8C55); transition: width 0.9s var(--ease); }
+      /* Rating bar */
+      .rating-bar-col {
+        width: 110px;
+      }
+      .rating-bar-bg {
+        height: 4px;
+        border-radius: 99px;
+        background: var(--bg-3);
+        box-shadow: inset 1px 1px 3px #c0beb8;
+        overflow: hidden;
+      }
+      .rating-bar-fill {
+        height: 100%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, var(--cf), #ff8c55);
+        transition: width 0.9s var(--ease);
+      }
 
-    /* Skeleton */
-    .skeleton-row td { padding: 14px 20px; }
-    .sk { height: 14px; border-radius: 4px; background: linear-gradient(90deg, var(--bg) 25%, var(--bg-2) 50%, var(--bg) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+      /* Skeleton */
+      .skeleton-row td {
+        padding: 14px 20px;
+      }
+      .sk {
+        height: 14px;
+        border-radius: 4px;
+        background: linear-gradient(90deg, var(--bg) 25%, var(--bg-2) 50%, var(--bg) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+      }
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
 
-    .table-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 24px; gap: 14px; color: var(--ink-3); }
-    .table-empty-icon { font-size: 40px; opacity: 0.25; }
-    .table-empty-text { font-family: var(--mono); font-size: 13px; letter-spacing: 0.04em; }
+      .table-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 24px;
+        gap: 14px;
+        color: var(--ink-3);
+      }
+      .table-empty-icon {
+        font-size: 40px;
+        opacity: 0.25;
+      }
+      .table-empty-text {
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.04em;
+      }
 
-    /* Toast */
-    .toast { position: fixed; bottom: 28px; right: 28px; z-index: 999; background: var(--navy); color: var(--white); font-family: var(--mono); font-size: 12px; padding: 12px 20px; border-radius: 10px; box-shadow: 8px 8px 24px rgba(10,22,40,0.4); transform: translateY(16px); opacity: 0; transition: all 0.3s var(--ease); pointer-events: none; border: 1px solid rgba(255,255,255,0.08); }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.ok  { border-color: rgba(22,163,74,0.3); }
-    .toast.err { border-color: rgba(255,79,0,0.3); }
+      /* Toast */
+      .toast {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        z-index: 999;
+        background: var(--navy);
+        color: var(--white);
+        font-family: var(--mono);
+        font-size: 12px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        box-shadow: 8px 8px 24px rgba(10, 22, 40, 0.4);
+        transform: translateY(16px);
+        opacity: 0;
+        transition: all 0.3s var(--ease);
+        pointer-events: none;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .toast.ok {
+        border-color: rgba(22, 163, 74, 0.3);
+      }
+      .toast.err {
+        border-color: rgba(255, 79, 0, 0.3);
+      }
 
-    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-    @media (max-width: 768px) {
-      .nav { padding: 0 20px; }
-      .nav-links { display: none; }
-      .main { padding: 28px 20px 60px; }
-      .page-top { flex-direction: column; align-items: flex-start; gap: 16px; }
-      .summary-row { grid-template-columns: 1fr 1fr; }
-      .rating-bar-col, .lb-table th:nth-child(5), .lb-table td:nth-child(5) { display: none; }
-      .lb-table th, .lb-table td { padding: 12px 14px; }
-      .register-strip { flex-wrap: wrap; }
-      .reg-input { max-width: 100%; flex: 1 1 140px; }
-    }
+      @media (max-width: 768px) {
+        .nav {
+          padding: 0 20px;
+        }
+        .nav-links {
+          display: none;
+        }
+        .main {
+          padding: 28px 20px 60px;
+        }
+        .page-top {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 16px;
+        }
+        .summary-row {
+          grid-template-columns: 1fr 1fr;
+        }
+        .rating-bar-col,
+        .lb-table th:nth-child(5),
+        .lb-table td:nth-child(5) {
+          display: none;
+        }
+        .lb-table th,
+        .lb-table td {
+          padding: 12px 14px;
+        }
+        .register-strip {
+          flex-wrap: wrap;
+        }
+        .reg-input {
+          max-width: 100%;
+          flex: 1 1 140px;
+        }
+      }
 
-    /* Page transition overlay styling */
-    .page-transition-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: var(--bg);
-      z-index: 9999;
-      pointer-events: none;
-      opacity: 1;
-      transition: opacity 0.3s var(--ease);
-    }
-    .page-transition-overlay.fade-out {
-      opacity: 0;
-    }
-  </style>
-</head>
-<body>
+      /* Page transition overlay styling */
+      .page-transition-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bg);
+        z-index: 9999;
+        pointer-events: none;
+        opacity: 1;
+        transition: opacity 0.3s var(--ease);
+      }
+      .page-transition-overlay.fade-out {
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="nav">
+      <a href="../index.html" class="nav-brand">
+        <div class="nav-logo"><span>CF</span></div>
+        Companion
+      </a>
+      <div class="nav-links">
+        <a href="../index.html#features" class="nav-link">Features</a>
+        <a href="../index.html#picker" class="nav-link">Picker</a>
+        <a href="dashboard.html" class="nav-link">Analyzer</a>
+        <a href="leaderboard.html" class="nav-link active">Leaderboard</a>
+        <a href="contests.html" class="nav-link">Contests</a>
+        <a href="ai-coach.html" class="nav-link">AI Coach</a>
+        <a href="forum.html" class="nav-link">Forum</a>
+      </div>
+      <div class="nav-cta">
+        <a href="leaderboard.html" class="btn-neo btn-outline">Join Leaderboard</a>
+        <a href="dashboard.html" class="btn-neo btn-solid">Analyze Profile →</a>
+      </div>
+    </nav>
 
-<nav class="nav">
-  <a href="../index.html" class="nav-brand">
-    <div class="nav-logo"><span>CF</span></div>
-    Companion
-  </a>
-  <div class="nav-links">
-    <a href="../index.html#features" class="nav-link">Features</a>
-    <a href="../index.html#picker" class="nav-link">Picker</a>
-    <a href="dashboard.html" class="nav-link">Analyzer</a>
-    <a href="leaderboard.html" class="nav-link active">Leaderboard</a>
-    <a href="contests.html" class="nav-link">Contests</a>
-    <a href="ai-coach.html" class="nav-link">AI Coach</a>
-    <a href="forum.html" class="nav-link">Forum</a>
-  </div>
-  <div class="nav-cta">
-    <a href="leaderboard.html" class="btn-neo btn-outline">Join Leaderboard</a>
-    <a href="dashboard.html" class="btn-neo btn-solid">Analyze Profile →</a>
-  </div>
-</nav>
+    <main class="main">
+      <div class="page-top">
+        <div>
+          <div class="page-eyebrow">// global rankings</div>
+          <h1 class="page-title">Leaderboard</h1>
+        </div>
+        <div class="sort-controls">
+          <button class="sort-btn active" id="sortRating" onclick="setSort('rating')">
+            By Rating
+          </button>
+          <button class="sort-btn" id="sortSolved" onclick="setSort('solved')">By Solved</button>
+          <button
+            class="sort-btn"
+            id="syncAllBtn"
+            onclick="syncAllUsers()"
+            style="
+              background: var(--cf-pale);
+              color: var(--cf);
+              border-color: rgba(255, 79, 0, 0.25);
+            "
+          >
+            ↻ Sync All
+          </button>
+        </div>
+      </div>
 
-<main class="main">
+      <!-- Register -->
+      <div class="register-strip">
+        <div class="reg-label">// Join</div>
+        <input
+          class="reg-input"
+          id="regHandle"
+          type="text"
+          placeholder="your CF handle"
+          spellcheck="false"
+          autocomplete="off"
+        />
+        <input
+          class="reg-input reg-email"
+          id="regEmail"
+          type="email"
+          placeholder="email (optional)"
+        />
+        <button class="reg-btn" id="regBtn" onclick="registerUser()">Add Me →</button>
+        <span class="reg-msg" id="regMsg"></span>
+      </div>
 
-  <div class="page-top">
-    <div>
-      <div class="page-eyebrow">// global rankings</div>
-      <h1 class="page-title">Leaderboard</h1>
-    </div>
-    <div class="sort-controls">
-      <button class="sort-btn active" id="sortRating" onclick="setSort('rating')">By Rating</button>
-      <button class="sort-btn" id="sortSolved" onclick="setSort('solved')">By Solved</button>
-      <button class="sort-btn" id="syncAllBtn" onclick="syncAllUsers()" style="background:var(--cf-pale);color:var(--cf);border-color:rgba(255,79,0,0.25)">↻ Sync All</button>
-    </div>
-  </div>
+      <!-- Summary -->
+      <div class="summary-row">
+        <div class="summary-card">
+          <div class="summary-label">Registered Users</div>
+          <div class="summary-value" id="totalUsers">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label">Highest Rating</div>
+          <div class="summary-value" id="topRating" style="color: var(--cf)">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label">Total Solved</div>
+          <div class="summary-value" id="totalSolved">—</div>
+        </div>
+      </div>
 
-  <!-- Register -->
-  <div class="register-strip">
-    <div class="reg-label">// Join</div>
-    <input class="reg-input" id="regHandle" type="text" placeholder="your CF handle" spellcheck="false" autocomplete="off">
-    <input class="reg-input reg-email" id="regEmail" type="email" placeholder="email (optional)">
-    <button class="reg-btn" id="regBtn" onclick="registerUser()">Add Me →</button>
-    <span class="reg-msg" id="regMsg"></span>
-  </div>
+      <!-- Table -->
+      <div class="table-wrap">
+        <table class="lb-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Handle</th>
+              <th>Rank</th>
+              <th class="right">Rating</th>
+              <th class="right rating-bar-col">Progress</th>
+              <th class="right">Solved</th>
+            </tr>
+          </thead>
+          <tbody id="lbBody">
+            <tr class="skeleton-row">
+              <td><div class="sk" style="width: 24px"></div></td>
+              <td><div class="sk" style="width: 130px"></div></td>
+              <td><div class="sk" style="width: 80px"></div></td>
+              <td><div class="sk" style="width: 60px; margin-left: auto"></div></td>
+              <td></td>
+              <td><div class="sk" style="width: 40px; margin-left: auto"></div></td>
+            </tr>
+            <tr class="skeleton-row">
+              <td><div class="sk" style="width: 24px"></div></td>
+              <td><div class="sk" style="width: 110px"></div></td>
+              <td><div class="sk" style="width: 70px"></div></td>
+              <td><div class="sk" style="width: 60px; margin-left: auto"></div></td>
+              <td></td>
+              <td><div class="sk" style="width: 40px; margin-left: auto"></div></td>
+            </tr>
+            <tr class="skeleton-row">
+              <td><div class="sk" style="width: 24px"></div></td>
+              <td><div class="sk" style="width: 150px"></div></td>
+              <td><div class="sk" style="width: 90px"></div></td>
+              <td><div class="sk" style="width: 60px; margin-left: auto"></div></td>
+              <td></td>
+              <td><div class="sk" style="width: 40px; margin-left: auto"></div></td>
+            </tr>
+            <tr class="skeleton-row">
+              <td><div class="sk" style="width: 24px"></div></td>
+              <td><div class="sk" style="width: 120px"></div></td>
+              <td><div class="sk" style="width: 75px"></div></td>
+              <td><div class="sk" style="width: 60px; margin-left: auto"></div></td>
+              <td></td>
+              <td><div class="sk" style="width: 40px; margin-left: auto"></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
 
-  <!-- Summary -->
-  <div class="summary-row">
-    <div class="summary-card">
-      <div class="summary-label">Registered Users</div>
-      <div class="summary-value" id="totalUsers">—</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-label">Highest Rating</div>
-      <div class="summary-value" id="topRating" style="color:var(--cf)">—</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-label">Total Solved</div>
-      <div class="summary-value" id="totalSolved">—</div>
-    </div>
-  </div>
+    <div class="toast" id="toast"></div>
 
-  <!-- Table -->
-  <div class="table-wrap">
-    <table class="lb-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Handle</th>
-          <th>Rank</th>
-          <th class="right">Rating</th>
-          <th class="right rating-bar-col">Progress</th>
-          <th class="right">Solved</th>
-        </tr>
-      </thead>
-      <tbody id="lbBody">
-        <tr class="skeleton-row"><td><div class="sk" style="width:24px"></div></td><td><div class="sk" style="width:130px"></div></td><td><div class="sk" style="width:80px"></div></td><td><div class="sk" style="width:60px;margin-left:auto"></div></td><td></td><td><div class="sk" style="width:40px;margin-left:auto"></div></td></tr>
-        <tr class="skeleton-row"><td><div class="sk" style="width:24px"></div></td><td><div class="sk" style="width:110px"></div></td><td><div class="sk" style="width:70px"></div></td><td><div class="sk" style="width:60px;margin-left:auto"></div></td><td></td><td><div class="sk" style="width:40px;margin-left:auto"></div></td></tr>
-        <tr class="skeleton-row"><td><div class="sk" style="width:24px"></div></td><td><div class="sk" style="width:150px"></div></td><td><div class="sk" style="width:90px"></div></td><td><div class="sk" style="width:60px;margin-left:auto"></div></td><td></td><td><div class="sk" style="width:40px;margin-left:auto"></div></td></tr>
-        <tr class="skeleton-row"><td><div class="sk" style="width:24px"></div></td><td><div class="sk" style="width:120px"></div></td><td><div class="sk" style="width:75px"></div></td><td><div class="sk" style="width:60px;margin-left:auto"></div></td><td></td><td><div class="sk" style="width:40px;margin-left:auto"></div></td></tr>
-      </tbody>
-    </table>
-  </div>
+    <script src="../js/config.js"></script>
+    <script>
+      const API = window.CF_API_URL || "http://localhost:3000";
+      let allRows = [],
+        sortMode = "rating";
 
-</main>
+      function toast(msg, type = "") {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.className = `toast ${type} show`;
+        clearTimeout(el._t);
+        el._t = setTimeout(() => el.classList.remove("show"), 3500);
+      }
 
-<div class="toast" id="toast"></div>
+      function rankBadgeClass(rank) {
+        if (!rank) return "newbie";
+        const r = rank.toLowerCase().replace(/\s+/g, "");
+        if (r.includes("legendary")) return "legendary";
+        if (r.includes("grandmaster")) return "grandmaster";
+        if (r.includes("master")) return "master";
+        if (r.includes("candidate")) return "candidate";
+        if (r.includes("expert")) return "expert";
+        if (r.includes("specialist")) return "specialist";
+        if (r.includes("pupil")) return "pupil";
+        return "newbie";
+      }
 
-<script src="../js/config.js"></script>
-<script>
-const API = window.CF_API_URL || "http://localhost:3000";
-let allRows = [], sortMode = "rating";
+      function ratingColor(r) {
+        if (!r || r < 1200) return "var(--ink-3)";
+        if (r < 1400) return "#16a34a";
+        if (r < 1600) return "#2563eb";
+        if (r < 1900) return "#7c3aed";
+        if (r < 2100) return "var(--cf)";
+        if (r < 2300) return "#d97706";
+        return "var(--gold)";
+      }
 
-function toast(msg, type="") {
-  const el = document.getElementById("toast");
-  el.textContent = msg; el.className = `toast ${type} show`;
-  clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove("show"),3500);
-}
+      function medal(i) {
+        if (i === 0) return `<span class="rank-medal">🥇</span>`;
+        if (i === 1) return `<span class="rank-medal">🥈</span>`;
+        if (i === 2) return `<span class="rank-medal">🥉</span>`;
+        return i + 1;
+      }
 
-function rankBadgeClass(rank) {
-  if (!rank) return "newbie";
-  const r = rank.toLowerCase().replace(/\s+/g,"");
-  if (r.includes("legendary")) return "legendary";
-  if (r.includes("grandmaster")) return "grandmaster";
-  if (r.includes("master")) return "master";
-  if (r.includes("candidate")) return "candidate";
-  if (r.includes("expert")) return "expert";
-  if (r.includes("specialist")) return "specialist";
-  if (r.includes("pupil")) return "pupil";
-  return "newbie";
-}
-
-function ratingColor(r) {
-  if (!r || r < 1200) return "var(--ink-3)";
-  if (r < 1400) return "#16a34a";
-  if (r < 1600) return "#2563eb";
-  if (r < 1900) return "#7c3aed";
-  if (r < 2100) return "var(--cf)";
-  if (r < 2300) return "#d97706";
-  return "var(--gold)";
-}
-
-function medal(i) {
-  if (i===0) return `<span class="rank-medal">🥇</span>`;
-  if (i===1) return `<span class="rank-medal">🥈</span>`;
-  if (i===2) return `<span class="rank-medal">🥉</span>`;
-  return i+1;
-}
-
-function renderTable(rows) {
-  const maxR = Math.max(...rows.map(r=>r.currentRating||0), 1);
-  const tbody = document.getElementById("lbBody");
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="table-empty"><div class="table-empty-icon">🏆</div><div class="table-empty-text">No users yet — be the first to join</div></div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = rows.map((u,i)=>{
-    const joined = u.lastSyncedAt ? new Date(u.lastSyncedAt).toLocaleDateString("en-US",{month:"short",year:"numeric"}) : "—";
-    const barPct = ((u.currentRating||0)/maxR)*100;
-    const color = ratingColor(u.currentRating);
-    return `<tr class="${i<3?`rank-${i+1}`:""}" onclick="window.location.href='dashboard.html?handle=${u.cfHandle}'">
+      function renderTable(rows) {
+        const maxR = Math.max(...rows.map((r) => r.currentRating || 0), 1);
+        const tbody = document.getElementById("lbBody");
+        if (!rows.length) {
+          tbody.innerHTML = `<tr><td colspan="6"><div class="table-empty"><div class="table-empty-icon">🏆</div><div class="table-empty-text">No users yet — be the first to join</div></div></td></tr>`;
+          return;
+        }
+        tbody.innerHTML = rows
+          .map((u, i) => {
+            const joined = u.lastSyncedAt
+              ? new Date(u.lastSyncedAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  year: "numeric",
+                })
+              : "—";
+            const barPct = ((u.currentRating || 0) / maxR) * 100;
+            const color = ratingColor(u.currentRating);
+            return `<tr class="${i < 3 ? `rank-${i + 1}` : ""}" onclick="window.location.href='dashboard.html?handle=${u.cfHandle}'">
       <td class="rank-cell">${medal(i)}</td>
       <td><div class="handle-cell">
         <div class="handle-avatar">${u.cfHandle.charAt(0).toUpperCase()}</div>
@@ -456,115 +926,151 @@ function renderTable(rows) {
           </div>
         </div>
       </div></td>
-      <td><span class="cf-rank-badge ${rankBadgeClass(u.cfRank)}">${u.cfRank||"unrated"}</span></td>
-      <td><div class="rating-cell" style="color:${color}">${u.currentRating||"—"}</div><div class="rating-peak">peak ${u.maxRating||"—"}</div></td>
+      <td><span class="cf-rank-badge ${rankBadgeClass(u.cfRank)}">${u.cfRank || "unrated"}</span></td>
+      <td><div class="rating-cell" style="color:${color}">${u.currentRating || "—"}</div><div class="rating-peak">peak ${u.maxRating || "—"}</div></td>
       <td class="rating-bar-col"><div class="rating-bar-bg"><div class="rating-bar-fill" style="width:0" data-w="${barPct}"></div></div></td>
-      <td class="solved-cell">${(u.solvedCount||0).toLocaleString()}</td>
+      <td class="solved-cell">${(u.solvedCount || 0).toLocaleString()}</td>
     </tr>`;
-  }).join("");
-  requestAnimationFrame(()=>{
-    document.querySelectorAll(".rating-bar-fill").forEach(el=>{
-      const w=el.dataset.w; el.style.width="0";
-      requestAnimationFrame(()=>{ el.style.width=w+"%"; });
-    });
-  });
-}
+          })
+          .join("");
+        requestAnimationFrame(() => {
+          document.querySelectorAll(".rating-bar-fill").forEach((el) => {
+            const w = el.dataset.w;
+            el.style.width = "0";
+            requestAnimationFrame(() => {
+              el.style.width = w + "%";
+            });
+          });
+        });
+      }
 
-function setSort(mode) {
-  sortMode=mode;
-  document.getElementById("sortRating").classList.toggle("active",mode==="rating");
-  document.getElementById("sortSolved").classList.toggle("active",mode==="solved");
-  const sorted=[...allRows].sort((a,b)=>mode==="rating"?(b.currentRating||0)-(a.currentRating||0):(b.solvedCount||0)-(a.solvedCount||0));
-  renderTable(sorted);
-}
+      function setSort(mode) {
+        sortMode = mode;
+        document.getElementById("sortRating").classList.toggle("active", mode === "rating");
+        document.getElementById("sortSolved").classList.toggle("active", mode === "solved");
+        const sorted = [...allRows].sort((a, b) =>
+          mode === "rating"
+            ? (b.currentRating || 0) - (a.currentRating || 0)
+            : (b.solvedCount || 0) - (a.solvedCount || 0)
+        );
+        renderTable(sorted);
+      }
 
-async function loadLeaderboard() {
-  try {
-    const res = await fetch(`${API}/api/leaderboard?limit=100`);
-    if (!res.ok) throw new Error("Failed to load");
-    allRows = await res.json();
-    document.getElementById("totalUsers").textContent = allRows.length;
-    document.getElementById("topRating").textContent = allRows.length ? (allRows[0].currentRating||"—") : "—";
-    document.getElementById("totalSolved").textContent = allRows.reduce((s,r)=>s+(r.solvedCount||0),0).toLocaleString();
-    setSort(sortMode);
-  } catch(err) {
-    document.getElementById("lbBody").innerHTML = `<tr><td colspan="6"><div class="table-empty"><div class="table-empty-icon">⚠</div><div class="table-empty-text">${err.message}</div></div></td></tr>`;
-  }
-}
+      async function loadLeaderboard() {
+        try {
+          const res = await fetch(`${API}/api/leaderboard?limit=100`);
+          if (!res.ok) throw new Error("Failed to load");
+          allRows = await res.json();
+          document.getElementById("totalUsers").textContent = allRows.length;
+          document.getElementById("topRating").textContent = allRows.length
+            ? allRows[0].currentRating || "—"
+            : "—";
+          document.getElementById("totalSolved").textContent = allRows
+            .reduce((s, r) => s + (r.solvedCount || 0), 0)
+            .toLocaleString();
+          setSort(sortMode);
+        } catch (err) {
+          document.getElementById("lbBody").innerHTML =
+            `<tr><td colspan="6"><div class="table-empty"><div class="table-empty-icon">⚠</div><div class="table-empty-text">${err.message}</div></div></td></tr>`;
+        }
+      }
 
-async function registerUser() {
-  const handle = document.getElementById("regHandle").value.trim();
-  const email  = document.getElementById("regEmail").value.trim();
-  const msg    = document.getElementById("regMsg");
-  const btn    = document.getElementById("regBtn");
-  if (!handle) return;
-  btn.disabled=true; btn.textContent="Adding..."; msg.textContent=""; msg.className="reg-msg";
-  try {
-    const res = await fetch(`${API}/api/users/register`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({cfHandle:handle,email:email||undefined})});
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    msg.textContent=`✓ ${handle} added!`; msg.className="reg-msg ok";
-    document.getElementById("regHandle").value=""; document.getElementById("regEmail").value="";
-    toast(`${handle} registered and synced!`,"ok");
-    setTimeout(loadLeaderboard,1000);
-  } catch(err) {
-    msg.textContent=err.message; msg.className="reg-msg err"; toast(err.message,"err");
-  } finally { btn.disabled=false; btn.textContent="Add Me →"; }
-}
+      async function registerUser() {
+        const handle = document.getElementById("regHandle").value.trim();
+        const email = document.getElementById("regEmail").value.trim();
+        const msg = document.getElementById("regMsg");
+        const btn = document.getElementById("regBtn");
+        if (!handle) return;
+        btn.disabled = true;
+        btn.textContent = "Adding...";
+        msg.textContent = "";
+        msg.className = "reg-msg";
+        try {
+          const res = await fetch(`${API}/api/users/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ cfHandle: handle, email: email || undefined }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error);
+          msg.textContent = `✓ ${handle} added!`;
+          msg.className = "reg-msg ok";
+          document.getElementById("regHandle").value = "";
+          document.getElementById("regEmail").value = "";
+          toast(`${handle} registered and synced!`, "ok");
+          setTimeout(loadLeaderboard, 1000);
+        } catch (err) {
+          msg.textContent = err.message;
+          msg.className = "reg-msg err";
+          toast(err.message, "err");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Add Me →";
+        }
+      }
 
-async function syncAllUsers() {
-  if (!allRows.length) return;
-  const btn = document.getElementById("syncAllBtn");
-  btn.disabled = true;
-  const originalText = btn.textContent;
-  try {
-    for (let i = 0; i < allRows.length; i++) {
-      const handle = allRows[i].cfHandle;
-      btn.textContent = `Syncing (${i + 1}/${allRows.length})...`;
-      await fetch(`${API}/api/users/${handle}/sync`, { method: "POST" });
-    }
-    toast("✓ All profiles synced successfully!", "ok");
-    loadLeaderboard();
-  } catch (err) {
-    toast("Some syncs failed: " + err.message, "err");
-  } finally {
-    btn.textContent = originalText;
-    btn.disabled = false;
-  }
-}
+      async function syncAllUsers() {
+        if (!allRows.length) return;
+        const btn = document.getElementById("syncAllBtn");
+        btn.disabled = true;
+        const originalText = btn.textContent;
+        try {
+          for (let i = 0; i < allRows.length; i++) {
+            const handle = allRows[i].cfHandle;
+            btn.textContent = `Syncing (${i + 1}/${allRows.length})...`;
+            await fetch(`${API}/api/users/${handle}/sync`, { method: "POST" });
+          }
+          toast("✓ All profiles synced successfully!", "ok");
+          loadLeaderboard();
+        } catch (err) {
+          toast("Some syncs failed: " + err.message, "err");
+        } finally {
+          btn.textContent = originalText;
+          btn.disabled = false;
+        }
+      }
 
-document.getElementById("regHandle").addEventListener("keydown",e=>{if(e.key==="Enter")registerUser();});
-loadLeaderboard();
-
-// Page Transition Effect
-(function() {
-  const overlay = document.createElement("div");
-  overlay.className = "page-transition-overlay";
-  document.body.appendChild(overlay);
-  requestAnimationFrame(() => {
-    overlay.classList.add("fade-out");
-  });
-  setTimeout(() => {
-    overlay.remove();
-  }, 400);
-
-  document.querySelectorAll("a").forEach(link => {
-    const href = link.getAttribute("href");
-    if (!href || href.startsWith("#") || href.startsWith("http") || href.startsWith("javascript:") || link.target === "_blank") return;
-    link.addEventListener("click", e => {
-      e.preventDefault();
-      const exitOverlay = document.createElement("div");
-      exitOverlay.className = "page-transition-overlay fade-out";
-      document.body.appendChild(exitOverlay);
-      requestAnimationFrame(() => {
-        exitOverlay.classList.remove("fade-out");
+      document.getElementById("regHandle").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") registerUser();
       });
-      setTimeout(() => {
-        window.location.href = href;
-      }, 300);
-    });
-  });
-})();
-</script>
-</body>
+      loadLeaderboard();
+
+      // Page Transition Effect
+      (function () {
+        const overlay = document.createElement("div");
+        overlay.className = "page-transition-overlay";
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => {
+          overlay.classList.add("fade-out");
+        });
+        setTimeout(() => {
+          overlay.remove();
+        }, 400);
+
+        document.querySelectorAll("a").forEach((link) => {
+          const href = link.getAttribute("href");
+          if (
+            !href ||
+            href.startsWith("#") ||
+            href.startsWith("http") ||
+            href.startsWith("javascript:") ||
+            link.target === "_blank"
+          )
+            return;
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            const exitOverlay = document.createElement("div");
+            exitOverlay.className = "page-transition-overlay fade-out";
+            document.body.appendChild(exitOverlay);
+            requestAnimationFrame(() => {
+              exitOverlay.classList.remove("fade-out");
+            });
+            setTimeout(() => {
+              window.location.href = href;
+            }, 300);
+          });
+        });
+      })();
+    </script>
+  </body>
 </html>
