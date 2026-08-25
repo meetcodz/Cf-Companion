@@ -24,6 +24,7 @@ const allowedOrigins = [
   "http://localhost:5500",
   "http://127.0.0.1:5500",
   "http://localhost:3001",
+  "http://localhost:30011",
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
@@ -32,7 +33,11 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (curl, Postman, same-origin)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin) || process.env.NODE_ENV === "development") {
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".onrender.com") ||
+        process.env.NODE_ENV === "development"
+      ) {
         return callback(null, true);
       }
       callback(new Error(`CORS: origin ${origin} not allowed`));

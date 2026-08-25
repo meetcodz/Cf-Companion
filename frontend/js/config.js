@@ -1,12 +1,26 @@
 /**
  * CFCompanion Frontend Config
  *
- * This script is included on every page.
- * When served from the same backend, we can leave BACKEND_URL empty
- * to make relative API requests to the same host.
+ * Automatically detects runtime environment:
+ * - When running on HTTP/HTTPS (e.g. Render production at https://cf-companion-fcff.onrender.com or local dev at http://localhost:30011),
+ *   window.CF_API_URL dynamically resolves to window.location.origin.
+ * - This prevents hardcoding localhost on production (which causes "Failed to fetch" / mixed content errors).
+ * - Allows overriding via localStorage.setItem("cf_backend_url", "https://custom-backend.com") if needed.
  */
 
-const BACKEND_URL = "http://localhost:30011";
+(function () {
+  const savedUrl = localStorage.getItem("cf_backend_url");
 
-// This makes the URL available globally — all pages read window.CF_API_URL
-window.CF_API_URL = BACKEND_URL;
+  if (savedUrl) {
+    window.CF_API_URL = savedUrl;
+    return;
+  }
+
+  if (window.location.protocol && window.location.protocol.startsWith("http")) {
+    // When served over HTTP/HTTPS (local or production), API requests go to the same origin
+    window.CF_API_URL = window.location.origin;
+  } else {
+    // Fallback for file:// protocol (opening HTML files directly from disk)
+    window.CF_API_URL = "http://localhost:30011";
+  }
+})();
