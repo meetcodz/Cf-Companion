@@ -88,7 +88,17 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/forum", forumRoutes);
 
 // ─── Serve Frontend ───────────────────────────────────────────────────────────
-app.use(express.static(path.join(__dirname, "../../frontend")));
+app.use(
+  express.static(path.join(__dirname, "../../frontend"), {
+    etag: true,
+    maxAge: "1d",
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "public, max-age=120");
+      }
+    },
+  })
+);
 
 // 404 handler
 app.use((req, res) => {
