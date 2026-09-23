@@ -1,43 +1,14 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    SEAMLESS PAGE TRANSITIONS & PERSISTENT LAYOUT STYLES
-   CFCompanion — Premium SaaS Navigation Experience
+   CFCompanion — Native MPA View Transitions (Chrome 126+, Edge 126+, Safari 18+)
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* ── Top Progress Loading Bar ── */
-#nav-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 2.5px;
-  background: linear-gradient(90deg, #ff4f00, #ff7a00, #ffb300);
-  z-index: 100000;
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition:
-    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
-    opacity 0.2s ease;
-  pointer-events: none;
-  opacity: 0;
+/* ── Enable Native Cross-Document View Transitions ── */
+@view-transition {
+  navigation: auto;
 }
 
-#nav-progress.is-loading {
-  opacity: 1;
-  transform: scaleX(0.7);
-  transition:
-    transform 6s cubic-bezier(0.1, 0.5, 0.2, 1),
-    opacity 0.15s ease;
-}
-
-#nav-progress.is-complete {
-  opacity: 1;
-  transform: scaleX(1);
-  transition:
-    transform 0.15s ease-out,
-    opacity 0.25s ease 0.15s;
-}
-
-/* ── Persistent Navbar Locking ── */
+/* ── Persistent Navbar (Stationary across pages) ── */
 .nav {
   view-transition-name: main-navbar;
 }
@@ -48,7 +19,7 @@ main.main,
   view-transition-name: page-content;
 }
 
-/* ── Native View Transitions API (Chrome 111+, Edge 111+, Safari 18+) ── */
+/* ── View Transitions Animations ── */
 ::view-transition-old(main-navbar),
 ::view-transition-new(main-navbar) {
   /* Keep navbar completely static during page transitions */
@@ -86,30 +57,11 @@ main.main,
   }
 }
 
-/* ── CSS Fallback for browsers without View Transitions API ── */
-.page-transition-content {
-  will-change: opacity, transform;
-}
-
-.page-transition-content.is-exiting {
-  opacity: 0;
-  transform: translateY(-6px);
-  transition:
-    opacity 160ms cubic-bezier(0.4, 0, 1, 1),
-    transform 160ms cubic-bezier(0.4, 0, 1, 1);
-}
-
-.page-transition-content.is-starting {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-.page-transition-content.is-entering {
-  opacity: 1;
-  transform: translateY(0);
-  transition:
-    opacity 220ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+/* ── Page Exit Hint for Instant Feedback ── */
+body.is-navigating main.main,
+body.is-navigating .page {
+  opacity: 0.65;
+  transition: opacity 0.15s ease-out;
 }
 
 /* ── Accessibility: Respect Reduced Motion ── */
@@ -117,11 +69,6 @@ main.main,
   ::view-transition-old(page-content),
   ::view-transition-new(page-content) {
     animation-duration: 0.05s;
-    transform: none !important;
-  }
-  .page-transition-content.is-exiting,
-  .page-transition-content.is-entering {
-    transition-duration: 0.05s;
     transform: none !important;
   }
 }
