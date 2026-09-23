@@ -100,6 +100,38 @@
     });
   }
 
+  // Update active state on existing navbar links in-place (zero DOM replacement or jiggle)
+  function updateNavActiveState(targetUrl) {
+    const currentNav = document.querySelector("nav.nav");
+    if (!currentNav) return;
+    const targetPath = getCleanPath(targetUrl);
+
+    currentNav.querySelectorAll(".nav-link").forEach((link) => {
+      const rawHref = link.getAttribute("href") || "";
+      if (rawHref.includes("#")) {
+        link.classList.remove("active");
+        return;
+      }
+      try {
+        const linkPath = getCleanPath(new URL(rawHref, window.location.origin).pathname);
+        let isActive = false;
+        if (targetPath !== "/index.html" && linkPath === targetPath) {
+          isActive = true;
+        } else if (targetPath.includes("forum") && linkPath.includes("forum.html")) {
+          isActive = true;
+        } else if (targetPath.includes("practice") && linkPath.includes("ai-coach.html")) {
+          isActive = true;
+        }
+
+        if (isActive) {
+          link.classList.add("active");
+        } else {
+          link.classList.remove("active");
+        }
+      } catch (_) {}
+    });
+  }
+
   // Update navbar links and active tab state
   function updateNavbar(newDoc, targetUrl) {
     const currentNav = document.querySelector("nav.nav");
@@ -109,24 +141,16 @@
     // Synchronize nav modifier classes (e.g. nav-dark)
     currentNav.className = newNav.className;
 
-    // Normalize newNav links
-    normalizeNav(newNav, targetUrl);
+    // Update active class on existing nav links in-place (ZERO DOM REFLOW)
+    updateNavActiveState(targetUrl);
 
-    // Update active class on nav links
-    const targetPath = getCleanPath(targetUrl);
-    newNav.querySelectorAll(".nav-link").forEach((link) => {
-      const href = link.getAttribute("href");
-      if (!href) return;
-      const linkPath = getCleanPath(new URL(href, window.location.origin).pathname);
-      if (linkPath === targetPath) {
-        link.classList.add("active");
-      } else {
-        link.classList.remove("active");
-      }
-    });
-
-    // Replace inner content cleanly
-    currentNav.innerHTML = newNav.innerHTML;
+    // If new page has specialized CTA buttons (e.g. Back button), update only CTA container
+    const currentCta = currentNav.querySelector(".nav-cta");
+    const newCta = newNav.querySelector(".nav-cta");
+    if (currentCta && newCta && currentCta.innerHTML.trim() !== newCta.innerHTML.trim()) {
+      normalizeNav(newNav, targetUrl);
+      currentCta.innerHTML = newCta.innerHTML;
+    }
   }
 
   // Synchronize page-specific styles in <head>
@@ -342,8 +366,9 @@
     transitionTo(window.location.href, { updateHistory: false });
   });
 
-  // Normalize current navbar on page load
+  // Normalize current navbar on page load and ensure correct active link
   normalizeNav(document.querySelector("nav.nav"), window.location.href);
+  updateNavActiveState(window.location.href);
 
   // Expose global navigation function
   window.cfNavigate = transitionTo;
