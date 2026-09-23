@@ -59,12 +59,34 @@
     );
   }
 
+  // Normalize links inside a container to root-relative URLs
+  function normalizeNavLinks(nav, baseUrl) {
+    if (!nav) return;
+    nav.querySelectorAll("a").forEach((link) => {
+      const raw = link.getAttribute("href");
+      if (
+        !raw ||
+        raw.startsWith("javascript:") ||
+        raw.startsWith("mailto:") ||
+        raw.startsWith("tel:") ||
+        link.target === "_blank"
+      ) {
+        return;
+      }
+      try {
+        const resolved = new URL(raw, baseUrl);
+        if (resolved.origin === window.location.origin) {
+          link.setAttribute("href", resolved.pathname + resolved.search + resolved.hash);
+        }
+      } catch (_) {}
+    });
+  }
+
   // Execute scripts in a container or document
-  function runScripts(newDoc, targetContainer) {
+  function runScripts(newDoc) {
     // Run any page-specific external or inline scripts located in the new document body
     const scripts = Array.from(newDoc.querySelectorAll("body script"));
     scripts.forEach((oldScript) => {
-      // Don't re-run config.js or navigation.js
       const src = oldScript.getAttribute("src") || "";
       if (src.includes("navigation.js") || src.includes("config.js")) return;
 
@@ -90,51 +112,39 @@
     const newNav = newDoc.querySelector("nav.nav");
     if (!currentNav || !newNav) return;
 
+    // Normalize newNav links relative to targetUrl before copying
+    normalizeNavLinks(newNav, targetUrl);
+
     // Synchronize nav-dark modifier class if present
-    if (newNav.classList.contains("nav-dark")) {
-      currentNav.classList.add("nav-dark");
-    } else {
-      currentNav.classList.remove("nav-dark");
-    }
+    currentNav.className = newNav.className;
 
-    // Update active class on nav links
-    const currentLinks = currentNav.querySelectorAll(".nav-link");
-    const newPath = new URL(targetUrl, window.location.href).pathname.toLowerCase();
+    // Replace inner content of nav so brand, links, and cta match destination page
+    currentNav.innerHTML = newNav.innerHTML;
+  }
 
-    currentLinks.forEach((link) => {
-      const href = link.getAttribute("href");
-      if (!href) return;
-      const linkPath = new URL(href, targetUrl).pathname.toLowerCase();
-
-      // Check if this link matches target path
-      if (linkPath === newPath) {
-        link.classList.add("active");
-      } else {
-        link.classList.remove("active");
-      }
-    });
-
-    // Sync action CTA if differs
-    const currentCta = currentNav.querySelector(".nav-cta");
-    const newCta = newNav.querySelector(".nav-cta");
-    if (currentCta && newCta) {
-      currentCta.innerHTML = newCta.innerHTML;
-    }
+  function normalizePath(p) {
+    const lower = p.toLowerCase();
+    if (lower === "" || lower === "/" || lower === "/index.html") return "/";
+    return lower;
   }
 
   // Main Navigate Function
-  async function navigateTo(url, { updateHistory = true, isPopState = false } = {}) {
+  async function navigateTo(url, { updateHistory = true } = {}) {
     const targetUrl = new URL(url, window.location.href);
-    const cleanTargetUrl = targetUrl.origin + targetUrl.pathname + targetUrl.search;
-    const currentCleanUrl =
-      window.location.origin + window.location.pathname + window.location.search;
+    const targetCleanPath = normalizePath(targetUrl.pathname);
+    const currentCleanPath = normalizePath(window.location.pathname);
 
     // If only hash is changing on the same page, scroll smoothly
-    if (cleanTargetUrl === currentCleanUrl && targetUrl.hash) {
-      const targetEl = document.querySelector(targetUrl.hash);
-      if (targetEl) {
-        targetEl.scrollIntoView({ behavior: "smooth" });
-        if (updateHistory) history.pushState(null, "", targetUrl.href);
+    if (targetCleanPath === currentCleanPath && targetUrl.search === window.location.search) {
+      if (targetUrl.hash) {
+        const targetEl = document.querySelector(targetUrl.hash);
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: "smooth" });
+          if (updateHistory) history.pushState(null, "", targetUrl.href);
+          return;
+        }
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
     }
@@ -222,7 +232,7 @@
     }
 
     // Run scripts for the new page
-    runScripts(newDoc, newContainer);
+    runScripts(newDoc);
     finishProgress();
   }
 
@@ -239,7 +249,6 @@
     const href = link.getAttribute("href");
     if (
       !href ||
-      href.startsWith("#") ||
       href.startsWith("javascript:") ||
       href.startsWith("mailto:") ||
       href.startsWith("tel:") ||
@@ -249,7 +258,19 @@
       return;
     }
 
-    const targetUrl = new URL(href, window.location.href);
+    // If pure hash on same page (e.g. #features on index.html)
+    if (href.startsWith("#")) {
+      const targetEl = document.querySelector(href);
+      if (targetEl) {
+        e.preventDefault();
+        targetEl.scrollIntoView({ behavior: "smooth" });
+        history.pushState(null, "", href);
+      }
+      return;
+    }
+
+    // Use link.href which the browser resolves according to DOM context
+    const targetUrl = new URL(link.href);
     // Ignore external origin links
     if (targetUrl.origin !== window.location.origin) return;
 
@@ -265,16 +286,21 @@
     if (!href || href.startsWith("#") || href.startsWith("javascript:") || link.target === "_blank")
       return;
 
-    const targetUrl = new URL(href, window.location.href);
-    if (targetUrl.origin === window.location.origin) {
-      prefetch(targetUrl.href);
-    }
+    try {
+      const targetUrl = new URL(link.href);
+      if (targetUrl.origin === window.location.origin) {
+        prefetch(targetUrl.href);
+      }
+    } catch (_) {}
   });
 
   // Browser Back / Forward History Handling
   window.addEventListener("popstate", () => {
-    navigateTo(window.location.href, { updateHistory: false, isPopState: true });
+    navigateTo(window.location.href, { updateHistory: false });
   });
+
+  // Initial link normalization on page load
+  normalizeNavLinks(document.querySelector("nav.nav"), window.location.href);
 
   // Expose global navigateTo for programmatic navigation
   window.cfNavigate = navigateTo;
