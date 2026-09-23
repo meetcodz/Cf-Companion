@@ -1,0 +1,127 @@
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SEAMLESS PAGE TRANSITIONS & PERSISTENT LAYOUT STYLES
+   CFCompanion — Premium SaaS Navigation Experience
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ── Top Progress Loading Bar ── */
+#nav-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2.5px;
+  background: linear-gradient(90deg, #ff4f00, #ff7a00, #ffb300);
+  z-index: 100000;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.2s ease;
+  pointer-events: none;
+  opacity: 0;
+}
+
+#nav-progress.is-loading {
+  opacity: 1;
+  transform: scaleX(0.7);
+  transition:
+    transform 6s cubic-bezier(0.1, 0.5, 0.2, 1),
+    opacity 0.15s ease;
+}
+
+#nav-progress.is-complete {
+  opacity: 1;
+  transform: scaleX(1);
+  transition:
+    transform 0.15s ease-out,
+    opacity 0.25s ease 0.15s;
+}
+
+/* ── Persistent Navbar Locking ── */
+.nav {
+  view-transition-name: main-navbar;
+}
+
+/* ── Content Container Transition Mapping ── */
+main.main,
+.page {
+  view-transition-name: page-content;
+}
+
+/* ── Native View Transitions API (Chrome 111+, Edge 111+, Safari 18+) ── */
+::view-transition-old(main-navbar),
+::view-transition-new(main-navbar) {
+  /* Keep navbar completely static during page transitions */
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(page-content) {
+  animation: 160ms cubic-bezier(0.4, 0, 1, 1) both saasFadeOutSlide;
+}
+
+::view-transition-new(page-content) {
+  animation: 220ms cubic-bezier(0.16, 1, 0.3, 1) both saasFadeInSlide;
+}
+
+@keyframes saasFadeOutSlide {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes saasFadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── CSS Fallback for browsers without View Transitions API ── */
+.page-transition-content {
+  will-change: opacity, transform;
+}
+
+.page-transition-content.is-exiting {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity 160ms cubic-bezier(0.4, 0, 1, 1),
+    transform 160ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+.page-transition-content.is-starting {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.page-transition-content.is-entering {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Accessibility: Respect Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(page-content),
+  ::view-transition-new(page-content) {
+    animation-duration: 0.05s;
+    transform: none !important;
+  }
+  .page-transition-content.is-exiting,
+  .page-transition-content.is-entering {
+    transition-duration: 0.05s;
+    transform: none !important;
+  }
+}

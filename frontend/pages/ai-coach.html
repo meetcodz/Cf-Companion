@@ -10,6 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="../css/transitions.css" />
     <style>
       :root {
         --bg: #f2f0eb;
@@ -814,22 +815,6 @@
           flex: 1 1 200px;
         }
       }
-
-      .page-transition-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: var(--bg);
-        z-index: 9999;
-        pointer-events: none;
-        opacity: 1;
-        transition: opacity 0.3s var(--ease);
-      }
-      .page-transition-overlay.fade-out {
-        opacity: 0;
-      }
     </style>
   </head>
   <body>
@@ -1225,28 +1210,7 @@
       document.getElementById("hintUrl").addEventListener("keydown", (e) => {
         if (e.key === "Enter") getHint();
       });
-
-      // Page transition
-      (function () {
-        const overlay = document.createElement("div");
-        overlay.className = "page-transition-overlay";
-        document.body.appendChild(overlay);
-        requestAnimationFrame(() => overlay.classList.add("fade-out"));
-        setTimeout(() => overlay.remove(), 400);
-        document.querySelectorAll("a").forEach((link) => {
-          const href = link.getAttribute("href");
-          if (!href || href.startsWith("#") || href.startsWith("http") || link.target === "_blank")
-            return;
-          link.addEventListener("click", (e) => {
-            e.preventDefault();
-            const exit = document.createElement("div");
-            exit.className = "page-transition-overlay fade-out";
-            document.body.appendChild(exit);
-            requestAnimationFrame(() => exit.classList.remove("fade-out"));
-            setTimeout(() => (window.location.href = href), 300);
-          });
-        });
-      })();
     </script>
+    <script src="../js/navigation.js" defer></script>
   </body>
 </html>
